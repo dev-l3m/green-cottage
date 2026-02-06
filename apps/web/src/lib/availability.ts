@@ -1,5 +1,7 @@
 import { prisma } from './prisma';
-import type { BookingStatus } from '@prisma/client';
+
+/** Matches Prisma enum BookingStatus. */
+export type BookingStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED';
 
 export async function checkAvailability(
   cottageId: string,
