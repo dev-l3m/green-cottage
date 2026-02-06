@@ -93,7 +93,34 @@ async function main() {
     },
   });
 
-  console.log('Created cottages:', cottage1.slug, cottage2.slug);
+  // Cottages alignés avec le contenu JSON (puma, bruyere, petit-pierre, telegaphe) pour que /api/cottages/[slug] et /cottages/[slug]/book fonctionnent
+  const jsonSlugs = [
+    { slug: 'puma', name: 'Gîte Puma', summary: 'Maison familiale en lisière de forêt avec piscine partagée.', capacity: 6 },
+    { slug: 'bruyere', name: 'Gîte Bruyère', summary: 'Gîte chaleureux et fonctionnel pour escapade en couple ou en famille.', capacity: 4 },
+    { slug: 'petit-pierre', name: 'Gîte Petit Pierre', summary: 'Gîte convivial pour des séjours au calme.', capacity: 4 },
+    { slug: 'telegaphe', name: 'Gîte Télégaphe', summary: 'Gîte au charme authentique pour un séjour nature.', capacity: 4 },
+  ];
+  for (const c of jsonSlugs) {
+    await prisma.cottage.upsert({
+      where: { slug: c.slug },
+      update: {},
+      create: {
+        slug: c.slug,
+        title: c.name,
+        summary: c.summary,
+        description: 'Séjour confortable au plus proche de la nature. Équipements et extérieurs pour la détente et les moments de partage.',
+        capacity: c.capacity,
+        basePrice: 100,
+        cleaningFee: 30,
+        images: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800'],
+        amenities: ['WiFi', 'Cuisine équipée', 'Parking', 'Jardin'],
+        checkInTime: '17:00',
+        checkOutTime: '10:00',
+        isActive: true,
+      },
+    });
+  }
+  console.log('Created cottages:', cottage1.slug, cottage2.slug, ...jsonSlugs.map((c) => c.slug));
 
   // Create site content
   await prisma.siteContent.upsert({

@@ -12,7 +12,7 @@ export default function BlogPage() {
         <section className="relative h-[400px] overflow-hidden">
           <div className="absolute inset-0">
             <Image
-              src={siteImages.activities.cover}
+              src={siteImages.about.cover}
               alt="Blog"
               fill
               priority
