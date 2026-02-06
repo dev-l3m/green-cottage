@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { Booking } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { generateICalExport } from '@/lib/ical';
 
@@ -32,9 +31,10 @@ export async function GET(
       return NextResponse.json({ error: 'Feed not found' }, { status: 404 });
     }
 
+    type BookingItem = (typeof feed.cottage.bookings)[number];
     // Combine bookings and blocks for export
     const blocks = [
-      ...feed.cottage.bookings.map((booking: Booking) => ({
+      ...feed.cottage.bookings.map((booking: BookingItem) => ({
         id: booking.id,
         startDate: booking.startDate,
         endDate: booking.endDate,
