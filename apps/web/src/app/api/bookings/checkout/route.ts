@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { checkAvailability, createTemporaryLock } from '@/lib/availability';
 import { z } from 'zod';
 
@@ -70,7 +70,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create Stripe checkout session
+    // Create Stripe checkout session (TEST MODE: requires STRIPE_SECRET_KEY at runtime).
+    let stripe;
+    try {
+      stripe = getStripe();
+    } catch (e) {
+      console.error('Checkout: Stripe not configured:', (e as Error).message);
+      return NextResponse.json(
+        { error: 'Payment is not configured. Set STRIPE_SECRET_KEY (TEST key) for checkout.' },
+        { status: 503 }
+      );
+    }
+
     const sessionUrl = `${process.env.APP_BASE_URL || process.env.NEXTAUTH_URL}/checkout/success`;
     const cancelUrl = `${process.env.APP_BASE_URL || process.env.NEXTAUTH_URL}/cottages/${cottage.slug}`;
 
