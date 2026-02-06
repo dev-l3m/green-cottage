@@ -7,7 +7,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // DATABASE_URL: local (.env) ou prod (.env.local / Vercel). Accelerate ou postgres://.
+  // DATABASE_URL : chargé depuis .env (local) ou variables d'environnement Vercel (déploiement).
+  // Pour tester en "production" sur Vercel avec les mêmes données que en local : définir
+  // dans Vercel (Settings → Environment Variables) la même valeur que dans .env.local
+  // (ex. URL Prisma Accelerate ou postgres direct). Le runtime accepte aussi PRISMA_DATABASE_URL
+  // via src/lib/prisma.ts si DATABASE_URL n'est pas défini.
   url      = env("DATABASE_URL")
 }
 
@@ -93,9 +97,27 @@ model Cottage {
   availabilityBlocks AvailabilityBlock[]
   icalFeeds         IcalFeed[]
   reviews           Review[]
+  publicReviews     PublicReview[]
 
   @@index([slug])
   @@index([isActive])
+}
+
+model PublicReview {
+  id        String   @id @default(cuid())
+  cottageId String
+  slug      String   // Denormalized for easy query by slug
+  rating    Int      // 1-5
+  author    String?
+  comment   String   @db.Text
+  status    String   @default("PUBLISHED") // PUBLISHED | REJECTED
+  createdAt DateTime @default(now())
+
+  cottage Cottage @relation(fields: [cottageId], references: [id], onDelete: Cascade)
+
+  @@index([cottageId])
+  @@index([slug])
+  @@index([status])
 }
 
 model AvailabilityBlock {

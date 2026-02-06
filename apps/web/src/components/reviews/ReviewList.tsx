@@ -1,10 +1,18 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { StarRating } from './StarRating';
-import type { Review } from '@/lib/reviews';
+
+export type DisplayReview = {
+  id: string;
+  rating: number;
+  author: string;
+  /** French, or bilingual for JSON reviews */
+  comment: string | { fr: string; en?: string };
+  createdAt: string;
+};
 
 interface ReviewListProps {
-  reviews: Review[];
-  lang: 'fr' | 'en';
+  reviews: DisplayReview[];
+  lang?: 'fr' | 'en';
 }
 
 function formatDate(iso: string, locale: string): string {
@@ -19,7 +27,7 @@ function formatDate(iso: string, locale: string): string {
   }
 }
 
-export function ReviewList({ reviews, lang }: ReviewListProps) {
+export function ReviewList({ reviews, lang = 'fr' }: ReviewListProps) {
   if (reviews.length === 0) {
     return (
       <p className="text-muted-foreground py-6 text-center rounded-2xl bg-muted/30">
@@ -49,7 +57,11 @@ export function ReviewList({ reviews, lang }: ReviewListProps) {
                 </span>
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                {lang === 'fr' ? review.comment.fr : review.comment.en}
+                {typeof review.comment === 'string'
+                  ? review.comment
+                  : lang === 'fr'
+                    ? review.comment.fr
+                    : review.comment.en ?? review.comment.fr}
               </p>
             </CardContent>
           </Card>

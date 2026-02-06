@@ -1,31 +1,12 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CottageCard } from '@/components/cottages/CottageCard';
-import cottagesData from '@/content/cottages.json';
+import { getCottagesForListing } from '@/lib/cottages';
 
-// Type for cottage from JSON
-type CottageFromJSON = {
-  id: number;
-  slug: string;
-  name: string;
-  summary: string;
-  description: string;
-  facts: {
-    capacity?: number;
-    rooms?: number;
-    beds?: number;
-    bathrooms?: number;
-  };
-  amenities: string[];
-  images: {
-    hero: string;
-    gallery: string[];
-  };
-  sourceUrl: string;
-};
+export const revalidate = 60;
 
 export default function CottagesPage() {
-  const cottages = cottagesData as CottageFromJSON[];
+  const cottages = getCottagesForListing();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -38,8 +19,7 @@ export default function CottagesPage() {
             <div className="text-center py-12">
               <p className="text-muted-foreground">Aucun cottage disponible pour le moment.</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Exécutez <code className="bg-muted px-2 py-1 rounded">pnpm content:scrape</code> pour
-                charger les données.
+                Ajoutez des cottages dans <code className="bg-muted px-2 py-1 rounded">src/content/cottages.json</code>.
               </p>
             </div>
           ) : (
@@ -47,14 +27,14 @@ export default function CottagesPage() {
               {cottages.map((cottage, index) => (
                 <CottageCard
                   key={cottage.id}
-                  id={cottage.id.toString()}
+                  id={cottage.id}
                   slug={cottage.slug}
-                  title={cottage.name}
-                  summary={cottage.summary}
-                  price={100}
-                  image={cottage.images.hero}
+                  title={cottage.title}
+                  summary={cottage.summary ?? undefined}
+                  price={cottage.basePrice}
+                  image={cottage.image}
                   imageIndex={index}
-                  capacity={cottage.facts.capacity}
+                  capacity={cottage.capacity}
                 />
               ))}
             </div>

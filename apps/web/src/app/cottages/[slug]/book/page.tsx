@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -9,16 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { loadStripe } from '@stripe/stripe-js';
 import { formatCurrency, calculateNights } from '@/lib/utils';
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 const DEFAULT_PRICE = 100;
 
 export default function BookPage({ params }: { params: { slug: string } }) {
-  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -31,6 +33,7 @@ export default function BookPage({ params }: { params: { slug: string } }) {
     capacity: number;
   } | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [devDialogOpen, setDevDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     startDate: '',
     endDate: '',
@@ -107,11 +110,6 @@ export default function BookPage({ params }: { params: { slug: string } }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!session) {
-      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href));
-      return;
-    }
-
     if (!formData.startDate || !formData.endDate) {
       toast({
         title: 'Erreur',
@@ -121,39 +119,9 @@ export default function BookPage({ params }: { params: { slug: string } }) {
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/bookings/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cottageId: effectiveCottage.id,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          guests: formData.guests,
-          options: formData.options,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la réservation');
-      }
-
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error('Stripe not loaded');
-
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
-    } catch (error: any) {
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-      setLoading(false);
-    }
+    // Pour le moment : afficher la fonctionnalité en cours de développement au lieu du paiement
+    setDevDialogOpen(true);
+    return;
   };
 
   if (fetchError && !cottage) {
@@ -303,6 +271,22 @@ export default function BookPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
         </form>
+
+        <Dialog open={devDialogOpen} onOpenChange={setDevDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Fonctionnalité en cours de développement</DialogTitle>
+            </DialogHeader>
+            <p className="text-muted-foreground">
+              La réservation et le paiement en ligne seront bientôt disponibles. Merci de votre patience.
+            </p>
+            <DialogFooter>
+              <Button type="button" onClick={() => setDevDialogOpen(false)}>
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
       <Footer />
     </div>
