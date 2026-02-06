@@ -29,8 +29,14 @@ function loadEnvFile(path) {
   return env;
 }
 
-// Garder les env du processus (Vercel, CI, etc.) et compléter avec .env puis .env.local
-const env = { ...process.env };
+// Garder les env du processus (Vercel, CI, etc.) et compléter avec .env puis .env.local.
+// Retirer npm_config_* (définies par pnpm) pour éviter les "Unknown env config" de npx/npm sur Vercel.
+const env = {};
+for (const [k, v] of Object.entries(process.env)) {
+  if (v === undefined) continue;
+  if (k.startsWith('npm_config_')) continue;
+  env[k] = v;
+}
 for (const p of [join(root, '.env'), join(root, '.env.local')]) {
   Object.assign(env, loadEnvFile(p));
 }
