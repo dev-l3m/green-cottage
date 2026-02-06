@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // DATABASE_URL: local (.env) ou prod (.env.local / Vercel). Accelerate ou postgres://.
   url      = env("DATABASE_URL")
 }
 
