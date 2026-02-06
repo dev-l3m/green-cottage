@@ -1,3 +1,13 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Autoriser les scripts postinstall pour Prisma, sharp, etc. (requis sur Vercel / pnpm 10+)
+# Sans ça : "Ignored build scripts: @prisma/client, prisma, ..."
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
+  - esbuild
+  - sharp
+  - unrs-resolver
