@@ -9,6 +9,9 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { spawnSync } from 'child_process';
 
+// Log immédiat pour confirmer que le script a démarré (Vercel)
+process.stdout.write('[build-with-env] Starting...\n');
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
@@ -47,24 +50,46 @@ if (!env.DATABASE_URL && (env.PRISMA_DATABASE_URL || env.POSTGRES_URL)) {
 }
 
 if (!env.DATABASE_URL) {
-  console.error('DATABASE_URL (ou PRISMA_DATABASE_URL / POSTGRES_URL) doit être défini dans .env, .env.local ou l’environnement.');
+  process.stderr.write('[build-with-env] ERROR: DATABASE_URL (ou PRISMA_DATABASE_URL / POSTGRES_URL) doit être défini.\n');
   process.exit(1);
 }
 
+process.stdout.write('[build-with-env] DATABASE_URL is set, running Prisma generate...\n');
+
 const isWin = process.platform === 'win32';
-const run = (cmd, args) =>
-  spawnSync(cmd, args, { cwd: root, env, stdio: 'inherit', shell: true });
+// Utiliser le binaire Prisma local si dispo (plus fiable que npx sur Vercel)
+const prismaName = isWin ? 'prisma.cmd' : 'prisma';
+const prismaInWeb = join(root, 'node_modules', '.bin', prismaName);
+const prismaInRoot = join(root, '..', '..', 'node_modules', '.bin', prismaName);
+const prismaBin = existsSync(prismaInWeb) ? prismaInWeb : existsSync(prismaInRoot) ? prismaInRoot : null;
 
-// 1. Prisma generate (toujours, pas besoin de BDD)
-let r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx prisma generate']);
-if (r.status !== 0) process.exit(r.status ?? 1);
-
-// 2. Migrations (optionnel en local si BDD injoignable ; requis sur Vercel)
-r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx prisma migrate deploy']);
-if (r.status !== 0) {
-  console.warn('\n⚠ prisma migrate deploy a échoué (BDD peut-être injoignable). Build Next.js continué.\n');
+function run(cmd, args) {
+  return spawnSync(cmd, args, { cwd: root, env, stdio: 'inherit', shell: isWin });
 }
 
-// 3. Next.js build
+// 1. Prisma generate (toujours, pas besoin de BDD)
+const genShell = prismaBin
+  ? (isWin ? `"${prismaBin}" generate` : `"${prismaBin}" generate`)
+  : 'npx prisma generate';
+let r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', genShell]);
+if (r.status !== 0) {
+  process.stderr.write(`[build-with-env] prisma generate failed with status ${r.status}\n`);
+  process.exit(r.status ?? 1);
+}
+
+process.stdout.write('[build-with-env] Prisma generate OK, running migrate deploy...\n');
+
+// 2. Migrations (optionnel en local si BDD injoignable ; requis sur Vercel)
+const migrateShell = prismaBin
+  ? (isWin ? `"${prismaBin}" migrate deploy` : `"${prismaBin}" migrate deploy`)
+  : 'npx prisma migrate deploy';
+r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', migrateShell]);
+if (r.status !== 0) {
+  process.stderr.write('[build-with-env] prisma migrate deploy failed (continuing with next build)\n');
+}
+
+process.stdout.write('[build-with-env] Running next build...\n');
+
+// 3. Next.js build (toujours via npx depuis apps/web)
 r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx next build']);
 process.exit(r.status ?? 1);
