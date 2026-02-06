@@ -52,11 +52,11 @@ export default function ContactPage() {
               </div>
               <div>
                 <strong>Téléphone:</strong>
-                <p className="text-muted-foreground">[TODO: Add phone]</p>
+                <p className="text-muted-foreground">020 7388 5619</p>
               </div>
               <div>
                 <strong>Adresse:</strong>
-                <p className="text-muted-foreground">[TODO: Add address]</p>
+                <p className="text-muted-foreground">123 Rue de la Paix, 75000 Paris, France</p>
               </div>
             </CardContent>
           </Card>

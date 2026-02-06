@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Booking } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { generateICalExport } from '@/lib/ical';
 
@@ -33,7 +34,7 @@ export async function GET(
 
     // Combine bookings and blocks for export
     const blocks = [
-      ...feed.cottage.bookings.map((booking) => ({
+      ...feed.cottage.bookings.map((booking: Booking) => ({
         id: booking.id,
         startDate: booking.startDate,
         endDate: booking.endDate,
