@@ -2,8 +2,6 @@
 const path = require('path');
 
 const nextConfig = {
-  // Avoid micromatch stack overflow during "Collecting build traces" on Vercel (pnpm monorepo)
-  outputFileTracingRoot: path.join(__dirname),
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -25,6 +23,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    outputFileTracingRoot: path.join(__dirname),
   },
 };
 
