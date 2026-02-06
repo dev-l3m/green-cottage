@@ -76,9 +76,9 @@ export function Header() {
             className="h-8 w-auto flex-shrink-0"
             priority
           />
-          <span className="font-heading text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
+          {/* <span className="font-heading text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
             Green Cottage
-          </span>
+          </span> */}
         </Link>
 
         {/* Desktop Navigation */}
