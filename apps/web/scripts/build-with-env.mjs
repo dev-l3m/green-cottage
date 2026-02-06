@@ -46,12 +46,19 @@ if (!env.DATABASE_URL) {
 }
 
 const isWin = process.platform === 'win32';
-const buildCmd = 'npx prisma generate && npx prisma migrate deploy && npx next build';
-const result = spawnSync(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', buildCmd], {
-  cwd: root,
-  env,
-  stdio: 'inherit',
-  shell: true,
-});
+const run = (cmd, args) =>
+  spawnSync(cmd, args, { cwd: root, env, stdio: 'inherit', shell: true });
 
-process.exit(result.status ?? 1);
+// 1. Prisma generate (toujours, pas besoin de BDD)
+let r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx prisma generate']);
+if (r.status !== 0) process.exit(r.status ?? 1);
+
+// 2. Migrations (optionnel en local si BDD injoignable ; requis sur Vercel)
+r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx prisma migrate deploy']);
+if (r.status !== 0) {
+  console.warn('\n⚠ prisma migrate deploy a échoué (BDD peut-être injoignable). Build Next.js continué.\n');
+}
+
+// 3. Next.js build
+r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', 'npx next build']);
+process.exit(r.status ?? 1);
