@@ -1,0 +1,305 @@
+[
+  {
+    "id": 1,
+    "slug": "puma",
+    "name": "Gîte Puma",
+    "summary": "Une maison familiale chaleureuse en lisière de forêt avec piscine partagée et vue paisible sur la plaine. Idéale pour les séjours prolongés.",
+    "description": "Nos gîtes sont conçus pour vous offrir un séjour confortable, convivial et au plus proche de la nature 🌿. Chaque logement dispose d'espaces pensés pour la détente, les repas en famille et les moments de partage, aussi bien à l'intérieur qu'à l'extérieur.",
+    "facts": {
+      "capacite_max": 6,
+      "chambres": 3,
+      "superficie_m2": 85.5
+    },
+    "amenities": [],
+    "images": {
+      "hero": "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite4-69736eb261f33.jpg",
+      "gallery": [
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite-puma4-69736b66e4cb7.jpg",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite-puma9-69736b9b5031e.jpg",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite-puma7-69736b776fbde.jpg",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite-puma6-69736bbbeef9c.jpg"
+      ]
+    },
+    "sourceUrl": "https://green-cottage.moryjinabovictorbrillant.com/detail-gite/1/fr",
+    "address": "Adresse à compléter",
+    "location": {
+      "lat": 45.7640,
+      "lng": 4.8357,
+      "city": "Région",
+      "region": "France"
+    },
+    "nearbyPlaces": [
+      {
+        "name": "Centre-ville",
+        "distance": "5 km",
+        "type": "Ville"
+      },
+      {
+        "name": "Restaurant",
+        "distance": "2 km",
+        "type": "Restauration"
+      },
+      {
+        "name": "Sentier de randonnée",
+        "distance": "1 km",
+        "type": "Activité"
+      }
+    ],
+    "badges": ["Idéal famille", "Nature", "Séjours prolongés", "Piscine partagée"],
+    "sections": [
+      {
+        "title": "Équipements et services",
+        "content": [
+          "Cuisine complète : lave-vaisselle, micro-ondes, congélateur et équipement pour cuisiner",
+          "Chauffage et eau chaude fiables pour un confort optimal en toute saison",
+          "Animaux acceptés (jusqu'à 2 animaux de moins de 25 kg, dans le respect des lieux)",
+          "Matériel bébé sur demande : lits parapluie et chaises hautes"
+        ]
+      },
+      {
+        "title": "Extérieurs enchanteurs",
+        "content": [
+          "Terrasse privée avec mobilier confortable et barbecue",
+          "Parking gratuit à proximité immédiate",
+          "Piscine hors sol partagée (5,60 m de diamètre, 1,30 m de hauteur)",
+          "Aire de jeux : balançoire, toboggan, panier de basket",
+          "Terrain de boules ombragé",
+          "Salle de jeux commune (30 m²) : ping-pong, baby-foot"
+        ]
+      },
+      {
+        "title": "Localisation stratégique",
+        "content": [
+          "Nature à portée de main : sentiers, table d'orientation, arboretum et centre équestre",
+          "Vienne à environ 20 minutes : patrimoine gallo-romain et festival de jazz",
+          "Palais Idéal du Facteur Cheval à Hauterives (environ 27 min)",
+          "Châteaux Renaissance : Jarcieu (11 min) et Roussillon (18 min)",
+          "Lyon à environ 45 minutes : musées, gastronomie, culture"
+        ]
+      }
+    ],
+    "practicalInfo": {
+      "arrivee": "Après 17h00",
+      "depart": "Avant 10h00",
+      "enfants": "Bienvenue (0–17 ans)",
+      "longue_duree": "Location prolongée possible",
+      "evenements": "Événements et corporate non autorisés (priorité à la sérénité)"
+    }
+  },
+  {
+    "id": 2,
+    "slug": "bruyere",
+    "name": "Gîte Bruyère",
+    "summary": "Un gîte chaleureux et fonctionnel, parfait pour une escapade en couple, en petite famille ou entre amis, au calme et proche de la nature.",
+    "description": "Nos gîtes sont conçus pour vous offrir un séjour confortable, convivial et au plus proche de la nature 🌿. Chaque logement dispose d'espaces pensés pour la détente, les repas en famille et les moments de partage, aussi bien à l'intérieur qu'à l'extérieur.",
+    "facts": {
+      "capacite_max": 4,
+      "chambres": 2,
+      "superficie_m2": 65
+    },
+    "amenities": [],
+    "images": {
+      "hero": "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite3-69736e929e87b.jpg",
+      "gallery": [
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/gite3-69736e929e87b.jpg",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/3-69736df42f18e.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/2-69736dbf334ea.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/5-69736e4e92f78.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/4-69736e2deb987.png"
+      ]
+    },
+    "sourceUrl": "https://green-cottage.moryjinabovictorbrillant.com/detail-gite/2/fr",
+    "address": "Adresse à compléter",
+    "location": {
+      "lat": 45.7640,
+      "lng": 4.8357,
+      "city": "Région",
+      "region": "France"
+    },
+    "nearbyPlaces": [],
+    "badges": ["Cosy", "Nature", "Petits groupes", "Piscine partagée"],
+    "sections": [
+      {
+        "title": "Équipements et services",
+        "content": [
+          "Pièces de vie pensées pour les repas et les moments de partage",
+          "Cuisine équipée pour un séjour autonome (repas maison, petit-déjeuner, etc.)",
+          "Espaces intérieurs conviviaux, adaptés aux séjours courts et longs",
+          "Rangements pratiques et aménagements confort"
+        ]
+      },
+      {
+        "title": "Extérieurs enchanteurs",
+        "content": [
+          "Espace extérieur agréable pour déjeuner, lire ou profiter du calme",
+          "Parking gratuit à proximité immédiate",
+          "Piscine hors sol partagée (5,60 m de diamètre, 1,30 m de hauteur)",
+          "Aire de jeux enfants : balançoire, toboggan, panier de basket",
+          "Terrain de boules ombragé",
+          "Salle de jeux commune (30 m²) : ping-pong, baby-foot"
+        ]
+      },
+      {
+        "title": "Localisation stratégique",
+        "content": [
+          "Accès rapide aux sentiers de randonnée et points nature (arboretum, centre équestre)",
+          "Vienne à environ 20 minutes : culture, balades, événements",
+          "Palais Idéal du Facteur Cheval à Hauterives (environ 27 min)",
+          "Châteaux Renaissance : Jarcieu (11 min) et Roussillon (18 min)",
+          "Lyon à environ 45 minutes : musées, restaurants, vie urbaine"
+        ]
+      }
+    ],
+    "practicalInfo": {
+      "arrivee": "Après 17h00",
+      "depart": "Avant 10h00",
+      "enfants": "Bienvenue (0–17 ans)",
+      "longue_duree": "Location prolongée possible",
+      "evenements": "Événements et corporate non autorisés (priorité à la sérénité)"
+    }
+  },
+  {
+    "id": 3,
+    "slug": "petit-pierre",
+    "name": "Gîte Petit Pierre",
+    "summary": "Un grand gîte spacieux pour familles et groupes, idéal pour se retrouver, cuisiner ensemble et profiter d'un séjour nature avec des espaces partagés.",
+    "description": "Nos gîtes sont conçus pour vous offrir un séjour confortable, convivial et au plus proche de la nature 🌿. Chaque logement dispose d'espaces pensés pour la détente, les repas en famille et les moments de partage, aussi bien à l'intérieur qu'à l'extérieur.",
+    "facts": {
+      "capacite_max": 8,
+      "chambres": 4,
+      "superficie_m2": 120
+    },
+    "amenities": [],
+    "images": {
+      "hero": "https://green-cottage.moryjinabovictorbrillant.com/assets/img/banner/banner-bg-4%201.png",
+      "gallery": [
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/banner/banner-bg-4%201.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/1-69736d196b147.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/3-69736d3490a4b.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/5-69736d5681e85.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/4-69736d75c43e8.png"
+      ]
+    },
+    "sourceUrl": "https://green-cottage.moryjinabovictorbrillant.com/detail-gite/3/fr",
+    "address": "Adresse à compléter",
+    "location": {
+      "lat": 45.7640,
+      "lng": 4.8357,
+      "city": "Région",
+      "region": "France"
+    },
+    "nearbyPlaces": [],
+    "badges": ["Grand groupe", "Familial", "Spacieux", "Piscine partagée"],
+    "sections": [
+      {
+        "title": "Équipements et services",
+        "content": [
+          "Capacité idéale pour familles nombreuses ou groupes d'amis",
+          "Espaces de vie généreux pour se réunir et partager des repas",
+          "Cuisine équipée pour organiser des repas à plusieurs",
+          "Disposition pensée pour le confort (repos, détente, convivialité)"
+        ]
+      },
+      {
+        "title": "Extérieurs enchanteurs",
+        "content": [
+          "Espaces extérieurs propices aux repas et moments de détente",
+          "Parking gratuit à proximité immédiate",
+          "Piscine hors sol partagée (5,60 m de diamètre, 1,30 m de hauteur)",
+          "Aire de jeux enfants : balançoire, toboggan, panier de basket",
+          "Terrain de boules ombragé",
+          "Salle de jeux commune (30 m²) : ping-pong, baby-foot"
+        ]
+      },
+      {
+        "title": "Localisation stratégique",
+        "content": [
+          "Séjour nature : randonnées, arboretum et activités plein air à proximité",
+          "Vienne à environ 20 minutes : visites historiques et culturelles",
+          "Palais Idéal du Facteur Cheval à Hauterives (environ 27 min)",
+          "Châteaux Renaissance : Jarcieu (11 min) et Roussillon (18 min)",
+          "Lyon à environ 45 minutes : escapades urbaines et gastronomiques"
+        ]
+      }
+    ],
+    "practicalInfo": {
+      "arrivee": "Après 17h00",
+      "depart": "Avant 10h00",
+      "enfants": "Bienvenue (0–17 ans)",
+      "longue_duree": "Location prolongée possible",
+      "evenements": "Événements et corporate non autorisés (priorité à la sérénité)"
+    }
+  },
+  {
+    "id": 4,
+    "slug": "telegaphe",
+    "name": "Gîte Télégraphe",
+    "summary": "Un gîte confortable et reposant, parfait pour se ressourcer au calme, profiter de la nature et partager des moments simples en famille ou entre amis.",
+    "description": "Nos gîtes sont conçus pour vous offrir un séjour confortable, convivial et au plus proche de la nature 🌿. Chaque logement dispose d'espaces pensés pour la détente, les repas en famille et les moments de partage, aussi bien à l'intérieur qu'à l'extérieur.",
+    "facts": {
+      "capacite_max": 5,
+      "chambres": 2,
+      "superficie_m2": 75
+    },
+    "amenities": [],
+    "images": {
+      "hero": "https://green-cottage.moryjinabovictorbrillant.com/assets/img/img-test/gite-puma/gite-puma1.jpg",
+      "gallery": [
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/img-test/gite-puma/gite-puma1.jpg",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/1-69736c39efab2.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/3-69736c7703229.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/4-69736c9cc7869.png",
+        "https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/5-69736cca20182.png"
+      ]
+    },
+    "sourceUrl": "https://green-cottage.moryjinabovictorbrillant.com/detail-gite/4/fr",
+    "address": "Adresse à compléter",
+    "location": {
+      "lat": 45.7640,
+      "lng": 4.8357,
+      "city": "Région",
+      "region": "France"
+    },
+    "nearbyPlaces": [],
+    "badges": ["Repos", "Nature", "Confort", "Piscine partagée"],
+    "sections": [
+      {
+        "title": "Équipements et services",
+        "content": [
+          "Aménagement confortable pour un séjour détente",
+          "Espaces pensés pour les repas et la convivialité",
+          "Cuisine équipée pour un séjour autonome",
+          "Organisation pratique pour accueillir famille et amis"
+        ]
+      },
+      {
+        "title": "Extérieurs enchanteurs",
+        "content": [
+          "Espace extérieur agréable pour profiter de l'air frais et du calme",
+          "Parking gratuit à proximité immédiate",
+          "Piscine hors sol partagée (5,60 m de diamètre, 1,30 m de hauteur)",
+          "Aire de jeux enfants : balançoire, toboggan, panier de basket",
+          "Terrain de boules ombragé",
+          "Salle de jeux commune (30 m²) : ping-pong, baby-foot"
+        ]
+      },
+      {
+        "title": "Localisation stratégique",
+        "content": [
+          "Accès rapide aux activités nature : sentiers, arboretum, centre équestre",
+          "Vienne à environ 20 minutes : patrimoine et sorties culturelles",
+          "Palais Idéal du Facteur Cheval à Hauterives (environ 27 min)",
+          "Châteaux Renaissance : Jarcieu (11 min) et Roussillon (18 min)",
+          "Lyon à environ 45 minutes : musées, gastronomie, culture"
+        ]
+      }
+    ],
+    "practicalInfo": {
+      "arrivee": "Après 17h00",
+      "depart": "Avant 10h00",
+      "enfants": "Bienvenue (0–17 ans)",
+      "longue_duree": "Location prolongée possible",
+      "evenements": "Événements et corporate non autorisés (priorité à la sérénité)"
+    }
+  }
+]

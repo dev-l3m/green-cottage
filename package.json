@@ -1,0 +1,30 @@
+{
+  "name": "green-cottage",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "build:no-generate": "pnpm --filter web build:no-generate",
+    "start": "pnpm --filter web start",
+    "lint": "pnpm --filter web lint",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "db:generate": "pnpm --filter web db:generate",
+    "db:migrate": "pnpm --filter web db:migrate",
+    "db:deploy": "pnpm --filter web db:deploy",
+    "db:seed": "pnpm --filter web db:seed",
+    "db:studio": "pnpm --filter web db:studio",
+    "prisma:migrate": "pnpm --filter web db:migrate",
+    "prisma:deploy": "pnpm --filter web db:deploy",
+    "seed": "pnpm --filter web db:seed",
+    "images:optimize": "pnpm --filter web images:optimize",
+    "favicons:generate": "pnpm --filter web favicons:generate",
+    "content:scrape": "pnpm --filter web content:scrape",
+    "content:download-images": "pnpm --filter web content:download-images"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}

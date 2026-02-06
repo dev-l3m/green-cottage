@@ -1,0 +1,143 @@
+{
+    "puma": [
+      {
+        "id": "rv_puma_001",
+        "rating": 5,
+        "comment": {
+          "fr": "Séjour parfait en famille : calme absolu, maison chaleureuse et très bien équipée. On a vraiment déconnecté.",
+          "en": "Perfect family stay: absolute calm, warm house and very well equipped. We truly unplugged."
+        },
+        "author": "Marie L.",
+        "tags": ["famille", "calme", "confort"],
+        "createdAt": "2026-01-12T10:10:00.000Z"
+      },
+      {
+        "id": "rv_puma_002",
+        "rating": 5,
+        "comment": {
+          "fr": "Un vrai esprit “retreat” nature : terrasse agréable, environnement verdoyant, et une sensation premium sans être ostentatoire.",
+          "en": "A true nature retreat vibe: lovely terrace, lush surroundings, and a premium feel without being flashy."
+        },
+        "author": "Sophie & Julien",
+        "tags": ["luxe discret", "nature", "détente"],
+        "createdAt": "2026-01-18T19:25:00.000Z"
+      },
+      {
+        "id": "rv_puma_003",
+        "rating": 4,
+        "comment": {
+          "fr": "Très bonne adresse pour se ressourcer. Propreté impeccable et séjour fluide. On reviendra aux beaux jours.",
+          "en": "Great place to recharge. Spotless and smooth stay. We’ll come back in warmer season."
+        },
+        "author": "Claire D.",
+        "tags": ["propreté", "repos"],
+        "createdAt": "2026-01-24T08:40:00.000Z"
+      }
+    ],
+    "bruyere": [
+      {
+        "id": "rv_bruyere_001",
+        "rating": 5,
+        "comment": {
+          "fr": "Ambiance conviviale et très “cocoon”. Les enfants ont adoré les espaces extérieurs. Parfait pour un week-end familial.",
+          "en": "Cozy and friendly atmosphere. Kids loved the outdoor spaces. Perfect for a family weekend."
+        },
+        "author": "Nadia M.",
+        "tags": ["famille", "convivial", "extérieur"],
+        "createdAt": "2026-01-09T15:10:00.000Z"
+      },
+      {
+        "id": "rv_bruyere_002",
+        "rating": 5,
+        "comment": {
+          "fr": "On sent l’attention aux détails : espaces agréables, séjour reposant et cadre naturel superbe. Très belle expérience.",
+          "en": "You can feel the attention to detail: pleasant spaces, restful stay, and a beautiful natural setting."
+        },
+        "author": "Thomas R.",
+        "tags": ["détail", "nature", "confort"],
+        "createdAt": "2026-01-14T12:05:00.000Z"
+      },
+      {
+        "id": "rv_bruyere_003",
+        "rating": 4,
+        "comment": {
+          "fr": "Très bon séjour, calme et chaleureux. Idéal pour se couper du rythme de la ville.",
+          "en": "Very good stay, calm and warm. Ideal to escape the city pace."
+        },
+        "author": "Lucie P.",
+        "tags": ["calme", "déconnexion"],
+        "createdAt": "2026-01-22T09:15:00.000Z"
+      }
+    ],
+    "petit-pierre": [
+      {
+        "id": "rv_pp_001",
+        "rating": 5,
+        "comment": {
+          "fr": "Gîte spacieux et premium, parfait pour groupe/famille. On a adoré le côté nature + confort haut de gamme.",
+          "en": "Spacious and premium, perfect for groups/families. Loved the nature + high-comfort combo."
+        },
+        "author": "Isabelle M.",
+        "tags": ["groupe", "premium", "nature"],
+        "createdAt": "2026-01-08T18:45:00.000Z"
+      },
+      {
+        "id": "rv_pp_002",
+        "rating": 5,
+        "comment": {
+          "fr": "Super pour se retrouver entre amis : beaucoup d’espace, ambiance conviviale, et on dort super bien (vraiment calme).",
+          "en": "Great for friends: lots of space, friendly vibe, and we slept amazingly well (really quiet)."
+        },
+        "author": "Antoine P.",
+        "tags": ["amis", "espace", "calme"],
+        "createdAt": "2026-01-16T21:00:00.000Z"
+      },
+      {
+        "id": "rv_pp_003",
+        "rating": 4,
+        "comment": {
+          "fr": "Très agréable, idéal pour plusieurs jours. On apprécie le cadre verdoyant et l’esprit “slow”.",
+          "en": "Very pleasant, ideal for a few days. We loved the green setting and slow-living spirit."
+        },
+        "author": "Camille S.",
+        "tags": ["slow", "écolo", "détente"],
+        "createdAt": "2026-01-26T11:30:00.000Z"
+      }
+    ],
+    "telegaphe": [
+      {
+        "id": "rv_tel_001",
+        "rating": 5,
+        "comment": {
+          "fr": "Un havre de paix. Luxe discret, atmosphère apaisante, parfait pour se ressourcer au vert.",
+          "en": "A peaceful haven. Quiet luxury, soothing atmosphere, perfect to recharge in nature."
+        },
+        "author": "Laura G.",
+        "tags": ["luxe discret", "nature", "repos"],
+        "createdAt": "2026-01-11T10:20:00.000Z"
+      },
+      {
+        "id": "rv_tel_002",
+        "rating": 5,
+        "comment": {
+          "fr": "Cadre magnifique et calme total. On a adoré la sensation “eco-retreat” et l’espace très cosy.",
+          "en": "Beautiful setting and total calm. Loved the eco-retreat feel and the very cozy space."
+        },
+        "author": "Nicolas & Emma",
+        "tags": ["écolo", "calme", "cosy"],
+        "createdAt": "2026-01-19T17:05:00.000Z"
+      },
+      {
+        "id": "rv_tel_003",
+        "rating": 4,
+        "comment": {
+          "fr": "Très bon séjour, idéal pour décrocher. L’ambiance nature est vraiment le point fort.",
+          "en": "Great stay, ideal to disconnect. The nature vibe is the real highlight."
+        },
+        "author": "Paul B.",
+        "tags": ["déconnexion", "nature"],
+        "createdAt": "2026-01-27T08:55:00.000Z"
+      }
+    ]
+  }
+  

@@ -1,0 +1,72 @@
+{
+  "hero": {
+    "title": "Activités & Restos",
+    "subtitle": "On a pensé à vous, on a pensé à tout",
+    "description": "Séjourner à Green Cottage, c'est profiter d'un cadre naturel exceptionnel tout en ayant accès à de nombreuses activités et bonnes adresses aux alentours."
+  },
+  "introduction": {
+    "content": [
+      "Nos gîtes sont situés au cœur de la forêt. À votre arrivée, suivez le Chemin du Télégraphe pour rejoindre facilement votre hébergement.",
+      "Le domaine a été pensé pour offrir à chacun liberté, calme et moments de partage, avec des espaces communs accessibles à tous."
+    ]
+  },
+  "onSite": {
+    "title": "Sur place, profitez librement",
+    "items": [
+      {
+        "title": "Espaces de jeux extérieurs",
+        "description": "Jeux pour enfants, espaces ouverts pour se dépenser et partager des moments conviviaux en famille."
+      },
+      {
+        "title": "Piscine partagée",
+        "description": "Idéale pour se rafraîchir lors des belles journées d'été, dans un cadre calme et sécurisé."
+      },
+      {
+        "title": "Terrain et espaces communs",
+        "description": "Des espaces pensés pour la détente, les échanges et les activités collectives."
+      },
+      {
+        "title": "Atelier & salle commune",
+        "description": "Un lieu polyvalent pour se retrouver, jouer, échanger ou organiser des activités en toute simplicité."
+      }
+    ]
+  },
+  "around": {
+    "title": "À découvrir aux alentours",
+    "description": "La région offre un large choix d'activités et de restaurants pour compléter votre séjour.",
+    "categories": [
+      {
+        "title": "Nature & plein air",
+        "items": [
+          "Randonnées en forêt et sentiers balisés",
+          "Balades à vélo",
+          "Découverte de paysages naturels préservés"
+        ]
+      },
+      {
+        "title": "Activités culturelles",
+        "items": [
+          "Villages et patrimoine local",
+          "Marchés régionaux",
+          "Sites historiques à proximité"
+        ]
+      },
+      {
+        "title": "Restaurants & gastronomie",
+        "items": [
+          "Tables locales et cuisine du terroir",
+          "Restaurants familiaux",
+          "Produits régionaux à déguster sur place ou à emporter"
+        ]
+      }
+    ]
+  },
+  "map": {
+    "title": "Repérez facilement le domaine",
+    "description": "Un plan vous permet de localiser chaque gîte ainsi que les espaces communs : piscine, jeux d'extérieur, atelier et chemins d'accès."
+  },
+  "callToAction": {
+    "title": "Vivez l'expérience Green Cottage",
+    "description": "Que vous soyez amateurs de nature, de détente ou de découvertes locales, tout est réuni pour un séjour équilibré entre repos et activités."
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "title": "Qui sommes-nous ?",
+    "subtitle": "Green Cottage, des séjours authentiques au cœur de la nature",
+    "description": "Green Cottage est une invitation à ralentir, à se reconnecter à l'essentiel et à partager des moments précieux en famille ou entre amis, dans un cadre naturel préservé."
+  },
+  "introduction": {
+    "title": "Une histoire de simplicité et de partage",
+    "content": [
+      "Green Cottage est né d'un désir simple : proposer des hébergements chaleureux, confortables et respectueux de leur environnement.",
+      "Nos gîtes ont été pensés comme de véritables lieux de vie, où l'on prend le temps de se retrouver, de respirer et de profiter de la nature, loin de l'agitation du quotidien."
+    ]
+  },
+  "values": {
+    "title": "Nos valeurs",
+    "items": [
+      {
+        "title": "🌿 Respect de la nature",
+        "description": "Nos hébergements s'intègrent harmonieusement dans leur environnement. Nous privilégions des choix durables, des espaces verts préservés et une approche responsable du tourisme."
+      },
+      {
+        "title": "👨‍👩‍👧‍👦 Esprit familial",
+        "description": "Green Cottage est avant tout un lieu de partage. Nos gîtes sont adaptés aux familles, aux groupes d'amis et aux moments simples qui créent de vrais souvenirs."
+      },
+      {
+        "title": "✨ Confort et authenticité",
+        "description": "Nous croyons qu'un séjour réussi passe par le confort, la simplicité et l'authenticité. Chaque gîte est aménagé avec soin pour que vous vous sentiez comme chez vous."
+      }
+    ]
+  },
+  "experience": {
+    "title": "Une expérience pensée pour vous",
+    "content": [
+      "Séjourner chez Green Cottage, c'est profiter d'espaces intérieurs conviviaux, de terrasses ouvertes sur la nature et d'équipements adaptés à toutes les saisons.",
+      "Piscine partagée, aire de jeux pour les enfants, espaces de détente et environnement calme : tout est réuni pour un séjour ressourçant."
+    ]
+  },
+  "location": {
+    "title": "Un emplacement idéal",
+    "content": [
+      "Situés au cœur de la campagne, nos gîtes offrent un accès privilégié à de nombreuses activités de plein air : randonnées, balades en forêt, découvertes culturelles et gastronomiques.",
+      "À proximité de villes et sites remarquables, Green Cottage combine tranquillité et accessibilité."
+    ]
+  },
+  "commitment": {
+    "title": "Notre engagement",
+    "content": [
+      "Nous nous engageons à offrir à chaque voyageur une expérience de qualité, dans un cadre respectueux de l'environnement et propice au bien-être.",
+      "Votre confort, votre tranquillité et vos souvenirs sont au cœur de nos priorités."
+    ]
+  },
+  "callToAction": {
+    "title": "Vivez l'expérience Green Cottage",
+    "description": "Que vous recherchiez une escapade nature, des vacances en famille ou un moment de détente, Green Cottage vous accueille pour un séjour inoubliable."
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "title": "Informations pratiques",
+  "subtitle": "Tout ce qu'il faut savoir pour une arrivée sereine",
+  "cottages": [
+    {
+      "id": 2,
+      "slug": "bruyere",
+      "name": "Gîte les Bruyères",
+      "items": [
+        {
+          "label": "Adresse du gîte",
+          "value": "Communiquée après confirmation de réservation"
+        },
+        {
+          "label": "Code pour récupérer la clé",
+          "value": "Transmis par message privé avant l'arrivée"
+        },
+        {
+          "label": "Réseau Wifi",
+          "value": "6-4EB0"
+        },
+        {
+          "label": "Mot de passe Wifi",
+          "value": "zpWKMqTaZWmD332VXc"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "petit-pierre",
+      "name": "Gîte Petit Pierre",
+      "items": [
+        {
+          "label": "Code pour récupérer la clé",
+          "value": "Transmis par message privé avant l'arrivée"
+        },
+        {
+          "label": "Réseau Wifi",
+          "value": "6-CAF0"
+        },
+        {
+          "label": "Mot de passe Wifi",
+          "value": "aN7sJHS3AY9dG9jwnU"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "slug": "puma",
+      "name": "Gîte Puma",
+      "items": [
+        {
+          "label": "Code pour récupérer la clé",
+          "value": "Transmis par message privé avant l'arrivée"
+        },
+        {
+          "label": "Réseau Wifi",
+          "value": "6-EF10"
+        },
+        {
+          "label": "Mot de passe Wifi",
+          "value": "uhhCzpdaA7JuR539he"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "telegaphe",
+      "name": "Gîte Le Télégraphe",
+      "items": [
+        {
+          "label": "Code pour récupérer la clé",
+          "value": "Transmis par message privé avant l'arrivée"
+        },
+        {
+          "label": "Réseau Wifi",
+          "value": "4B60"
+        },
+        {
+          "label": "Mot de passe Wifi",
+          "value": "0123456789"
+        }
+      ]
+    }
+  ]
+}

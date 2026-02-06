@@ -1,0 +1,317 @@
+{
+  "generated": "2026-02-05T15:29:38.561Z",
+  "images": {
+    "accueil-vue-600x500": [
+      {
+        "original": "accueil-vue-600x500.jpg",
+        "optimized": "accueil-vue-600x500.webp",
+        "path": "\\images\\optimized\\hero\\accueil-vue-600x500.webp",
+        "category": "hero",
+        "width": 1920
+      }
+    ],
+    "Bandeau-accueil-3-600x500": [
+      {
+        "original": "Bandeau-accueil-3-600x500.jpg",
+        "optimized": "bandeau-accueil-3-600x500.webp",
+        "path": "\\images\\optimized\\hero\\bandeau-accueil-3-600x500.webp",
+        "category": "hero",
+        "width": 1920
+      }
+    ],
+    "beautiful-mountain-forest-landscape": [
+      {
+        "original": "beautiful-mountain-forest-landscape.jpg",
+        "optimized": "beautiful-mountain-forest-landscape.webp",
+        "path": "\\images\\optimized\\gallery\\beautiful-mountain-forest-landscape.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "beautiful-mountain-forest-landscape.jpg",
+        "optimized": "beautiful-mountain-forest-landscape.webp",
+        "path": "\\images\\optimized\\cards\\beautiful-mountain-forest-landscape.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "beautiful-mountain-forest-landscape.jpg",
+        "optimized": "beautiful-mountain-forest-landscape.webp",
+        "path": "\\images\\optimized\\thumbs\\beautiful-mountain-forest-landscape.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "cropped-accueil-site-scaled-1": [
+      {
+        "original": "cropped-accueil-site-scaled-1.jpg",
+        "optimized": "cropped-accueil-site-scaled-1.webp",
+        "path": "\\images\\optimized\\hero\\cropped-accueil-site-scaled-1.webp",
+        "category": "hero",
+        "width": 1920
+      }
+    ],
+    "Green-Cottage-1": [
+      {
+        "original": "Green-Cottage-1.jpg",
+        "optimized": "green-cottage-1.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-1.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-1.jpg",
+        "optimized": "green-cottage-1.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-1.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-1.jpg",
+        "optimized": "green-cottage-1.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-1.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-10": [
+      {
+        "original": "Green-Cottage-10.jpg",
+        "optimized": "green-cottage-10.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-10.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-10.jpg",
+        "optimized": "green-cottage-10.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-10.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-10.jpg",
+        "optimized": "green-cottage-10.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-10.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-11": [
+      {
+        "original": "Green-Cottage-11.jpg",
+        "optimized": "green-cottage-11.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-11.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-11.jpg",
+        "optimized": "green-cottage-11.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-11.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-11.jpg",
+        "optimized": "green-cottage-11.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-11.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-2": [
+      {
+        "original": "Green-Cottage-2.jpg",
+        "optimized": "green-cottage-2.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-2.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-2.jpg",
+        "optimized": "green-cottage-2.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-2.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-2.jpg",
+        "optimized": "green-cottage-2.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-2.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-3": [
+      {
+        "original": "Green-Cottage-3.jpg",
+        "optimized": "green-cottage-3.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-3.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-3.jpg",
+        "optimized": "green-cottage-3.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-3.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-3.jpg",
+        "optimized": "green-cottage-3.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-3.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-4": [
+      {
+        "original": "Green-Cottage-4.jpg",
+        "optimized": "green-cottage-4.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-4.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-4.jpg",
+        "optimized": "green-cottage-4.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-4.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-4.jpg",
+        "optimized": "green-cottage-4.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-4.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-5": [
+      {
+        "original": "Green-Cottage-5.jpg",
+        "optimized": "green-cottage-5.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-5.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-5.jpg",
+        "optimized": "green-cottage-5.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-5.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-5.jpg",
+        "optimized": "green-cottage-5.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-5.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-6": [
+      {
+        "original": "Green-Cottage-6.jpg",
+        "optimized": "green-cottage-6.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-6.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-6.jpg",
+        "optimized": "green-cottage-6.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-6.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-6.jpg",
+        "optimized": "green-cottage-6.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-6.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-7": [
+      {
+        "original": "Green-Cottage-7.jpg",
+        "optimized": "green-cottage-7.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-7.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-7.jpg",
+        "optimized": "green-cottage-7.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-7.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-7.jpg",
+        "optimized": "green-cottage-7.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-7.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-8": [
+      {
+        "original": "Green-Cottage-8.jpg",
+        "optimized": "green-cottage-8.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-8.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-8.jpg",
+        "optimized": "green-cottage-8.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-8.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-8.jpg",
+        "optimized": "green-cottage-8.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-8.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "Green-Cottage-9": [
+      {
+        "original": "Green-Cottage-9.jpg",
+        "optimized": "green-cottage-9.webp",
+        "path": "\\images\\optimized\\gallery\\green-cottage-9.webp",
+        "category": "gallery",
+        "width": 1600
+      },
+      {
+        "original": "Green-Cottage-9.jpg",
+        "optimized": "green-cottage-9.webp",
+        "path": "\\images\\optimized\\cards\\green-cottage-9.webp",
+        "category": "cards",
+        "width": 1200
+      },
+      {
+        "original": "Green-Cottage-9.jpg",
+        "optimized": "green-cottage-9.webp",
+        "path": "\\images\\optimized\\thumbs\\green-cottage-9.webp",
+        "category": "thumbs",
+        "width": 600
+      }
+    ],
+    "logo_l3m": [
+      {
+        "original": "logo_l3m.png",
+        "optimized": "logo-l3m.webp",
+        "path": "\\images\\optimized\\branding\\logo-l3m.webp",
+        "category": "branding",
+        "width": 400
+      }
+    ]
+  }
+}
