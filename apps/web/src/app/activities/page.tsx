@@ -125,7 +125,6 @@ export default function ActivitiesPage() {
             <p className="text-muted-foreground mb-8 max-w-2xl">
               {data.around.description}
             </p>
-          3
           </section>
 
           {/* Map - même composant que les gîtes */}
