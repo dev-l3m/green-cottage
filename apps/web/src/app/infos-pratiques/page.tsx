@@ -54,7 +54,7 @@ export default function InfosPratiquesPage() {
             {data.cottages.map((cottage) => (
               <article
                 key={cottage.id}
-                className="bg-white rounded-2xl border border-green-800/30 shadow-sm overflow-hidden p-6 md:p-8 flex flex-col"
+                className="bg-card rounded-2xl border border-gc-forest/20 shadow-sm overflow-hidden p-6 md:p-8 flex flex-col"
               >
                 <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-6">
                   {cottage.name}
@@ -63,7 +63,7 @@ export default function InfosPratiquesPage() {
                   {cottage.items.map((item, i) => (
                     <li key={i} className="flex gap-3">
                       <span
-                        className="flex-shrink-0 w-2 h-2 rounded-full bg-green-700 mt-2"
+                        className="flex-shrink-0 w-2 h-2 rounded-full bg-gc-forest mt-2"
                         aria-hidden
                       />
                       <div>
@@ -80,7 +80,7 @@ export default function InfosPratiquesPage() {
                 <div className="mt-6 pt-6 border-t border-border">
                   <Link
                     href={`/cottages/${cottage.slug}`}
-                    className="inline-flex items-center justify-center rounded-lg bg-green-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2 transition-colors"
+                    className="inline-flex items-center justify-center rounded-lg bg-gc-forest text-white px-5 py-2.5 text-sm font-medium hover:bg-gc-forest/90 focus:outline-none focus:ring-2 focus:ring-gc-forest focus:ring-offset-2 transition-colors"
                   >
                     Voir le gîte
                   </Link>

@@ -76,9 +76,10 @@ export function Header() {
             className="h-8 w-auto flex-shrink-0"
             priority
           />
-          {/* <span className="font-heading text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
-            Green Cottage
-          </span> */}
+          <span className="font-heading text-xl sm:text-2xl font-bold whitespace-nowrap hidden sm:inline">
+            <span className="text-gc-forest">L3M</span>
+            <span className="text-gc-green"> Green Cottage</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -90,9 +91,9 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className={`text-sm font-medium hover:text-primary transition-colors ${
+                      className={`text-sm font-medium hover:text-gc-green transition-colors ${
                         item.dropdown.some((d) => isActive(d.href))
-                          ? 'text-primary'
+                          ? 'text-gc-green'
                           : 'text-foreground'
                       }`}
                     >
@@ -102,7 +103,7 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="w-56 bg-white rounded-lg shadow-lg border border-gray-200 mt-2"
+                    className="w-56 bg-background rounded-lg shadow-lg border mt-2"
                   >
                     {item.dropdown.map((dropdownItem) => (
                       <DropdownMenuItem key={dropdownItem.name} asChild>
@@ -110,8 +111,8 @@ export function Header() {
                           href={dropdownItem.href}
                           className={`block px-4 py-2 text-sm transition-colors ${
                             isActive(dropdownItem.href)
-                              ? 'text-primary font-medium bg-primary/5'
-                              : 'text-foreground hover:bg-gray-50'
+                              ? 'text-gc-green font-medium bg-gc-green/10'
+                              : 'text-foreground hover:bg-muted'
                           }`}
                         >
                           {dropdownItem.name}
@@ -128,8 +129,8 @@ export function Header() {
                 href={item.href}
                 className={`text-sm font-medium transition-colors px-3 py-2 rounded-md ${
                   isActive(item.href)
-                    ? 'text-primary bg-primary/10'
-                    : 'text-foreground hover:text-primary hover:bg-gray-50'
+                    ? 'text-gc-green bg-gc-green/10'
+                    : 'text-foreground hover:text-gc-green hover:bg-muted'
                 }`}
               >
                 {item.name}
@@ -188,7 +189,7 @@ export function Header() {
                   <div key={item.name}>
                     <button
                       onClick={() => toggleMobileDropdown(item.name)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:bg-gray-50 rounded-md transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:text-gc-green hover:bg-muted rounded-md transition-colors"
                     >
                       <span>{item.name}</span>
                       <ChevronDown
@@ -204,8 +205,8 @@ export function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                             className={`block px-4 py-2 text-sm rounded-md transition-colors ${
                               isActive(dropdownItem.href)
-                                ? 'text-primary font-medium bg-primary/10'
-                                : 'text-foreground hover:bg-gray-50'
+                                ? 'text-gc-green font-medium bg-gc-green/10'
+                                : 'text-foreground hover:bg-muted'
                             }`}
                           >
                             {dropdownItem.name}
@@ -223,8 +224,8 @@ export function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block px-4 py-3 text-sm font-medium rounded-md transition-colors ${
                     isActive(item.href)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:bg-gray-50'
+                      ? 'text-gc-green bg-gc-green/10'
+                      : 'text-foreground hover:bg-muted'
                   }`}
                 >
                   {item.name}

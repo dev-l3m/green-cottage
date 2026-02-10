@@ -23,8 +23,8 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#C5A900', // L3M Gold
-          foreground: '#000000',
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -50,11 +50,12 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        gold: {
-          DEFAULT: '#C5A900',
-          light: '#E5C900',
-          dark: '#A58900',
-        },
+        /* Charte Green Cottage - couleurs nommées */
+        'gc-forest': 'var(--gc-forest)',
+        'gc-green': 'var(--gc-green)',
+        'gc-mustard': 'var(--gc-mustard)',
+        'gc-gray': 'var(--gc-gray)',
+        'gc-beige': 'var(--gc-beige)',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -62,7 +63,7 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['var(--font-open-sans)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-montserrat)', 'system-ui', 'sans-serif'],
         heading: ['var(--font-montserrat)', 'system-ui', 'sans-serif'],
       },
       keyframes: {

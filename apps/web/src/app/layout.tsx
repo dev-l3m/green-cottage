@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Montserrat, Open_Sans } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
@@ -8,13 +8,6 @@ const montserrat = Montserrat({
   subsets: ['latin'],
   weight: ['400', '600', '700', '800'],
   variable: '--font-montserrat',
-  display: 'swap',
-});
-
-const openSans = Open_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '600'],
-  variable: '--font-open-sans',
   display: 'swap',
 });
 
@@ -44,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#C5A900',
+  themeColor: '#D4B237',
 };
 
 export default function RootLayout({
@@ -53,8 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${montserrat.variable} ${openSans.variable} font-sans`}>
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${montserrat.variable} font-sans antialiased`}>
         <Providers>
           {children}
           <Toaster />

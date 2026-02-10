@@ -56,7 +56,7 @@ async function generateFavicons() {
           type: 'image/png',
         },
       ],
-      theme_color: '#C5A900',
+      theme_color: '#D4B237',
       background_color: '#000000',
       display: 'standalone',
     };

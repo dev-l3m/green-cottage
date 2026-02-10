@@ -92,10 +92,10 @@ export default function ActivitiesPage() {
                 return (
                   <Card
                     key={i}
-                    className="rounded-xl border-green-800/20 bg-white shadow-sm overflow-hidden"
+                    className="rounded-xl border-gc-forest/20 bg-white shadow-sm overflow-hidden"
                   >
                     <CardContent className="p-6 text-center sm:text-left">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4 mx-auto sm:mx-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gc-green/10 text-gc-green mb-4 mx-auto sm:mx-0">
                         <Icon className="h-5 w-5" aria-hidden />
                       </div>
                       <h3 className="font-heading font-semibold text-lg mb-2 text-foreground">

@@ -32,11 +32,14 @@ export function Hero() {
       <div className="relative z-10 h-full flex items-center">
         <div className="container w-full">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 text-white drop-shadow-lg">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-3 text-white drop-shadow-lg">
               Trouvez votre cottage idéal
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-md">
-              Découvrez des hébergements de charme pour des séjours inoubliables
+            <p className="text-xl md:text-2xl text-gc-green font-semibold mb-2 drop-shadow-md">
+              Découvrez votre prochaine escapade verte
+            </p>
+            <p className="text-base md:text-lg text-white/90 mb-8 drop-shadow-md">
+              Des hébergements de charme pour des séjours inoubliables
             </p>
 
             <HeroSearchForm cottages={cottages} />

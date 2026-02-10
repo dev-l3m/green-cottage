@@ -87,7 +87,7 @@ export default function AccountPage() {
                               <span
                                 className={`inline-block px-2 py-1 text-xs rounded ${
                                   booking.status === 'PAID'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-gc-green/15 text-gc-forest'
                                     : booking.status === 'PENDING'
                                     ? 'bg-yellow-100 text-yellow-800'
                                     : 'bg-gray-100 text-gray-800'
