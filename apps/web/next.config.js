@@ -17,6 +17,11 @@ const nextConfig = {
         hostname: 'green-cottage.moryjinabovictorbrillant.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'private-us-east-1.manuscdn.com',
+        pathname: '/**',
+      },
     ],
   },
   experimental: {

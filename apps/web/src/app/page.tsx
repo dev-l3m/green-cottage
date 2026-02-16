@@ -3,8 +3,10 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Hero } from '@/components/home/Hero';
-import { FeaturedCottagesCarousel } from '@/components/home/FeaturedCottagesCarousel';
+import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
+import { AboutSection } from '@/components/home/AboutSection';
 import { BestReviewsSection } from '@/components/reviews/BestReviewsSection';
 import { getBestRatedReviews } from '@/lib/reviews';
 import cottagesData from '@/content/cottages.json';
@@ -13,13 +15,15 @@ type CottageFromJSON = {
   id: number;
   slug: string;
   name: string;
-  summary: string;
-  facts: { capacite_max?: number; capacity?: number };
-  images: { hero: string; gallery: string[] };
+  summary?: string;
+  description?: string;
+  facts?: { capacite_max?: number; capacity?: number };
+  images: { hero: string; gallery?: string[] };
+  badges?: string[];
 };
 
 export default function HomePage() {
-  const cottages = (cottagesData as CottageFromJSON[]).slice(0, 6);
+  const cottages = cottagesData as CottageFromJSON[];
   const bestReviews = getBestRatedReviews(6);
   const allCottages = cottagesData as CottageFromJSON[];
   const slugToName = allCottages.reduce(
@@ -34,53 +38,33 @@ export default function HomePage() {
         {/* Hero Section */}
         <Hero />
 
-        {/* Featured Cottages - horizontal auto-scroll, button stays in place */}
-        <section className="py-16">
+        {/* Featured Cottages - grille template */}
+        <section id="cottages" className="py-16 md:py-20">
           <div className="container">
-            <h2 className="font-heading text-3xl font-bold mb-8">Cottages en vedette</h2>
-            <FeaturedCottagesCarousel cottages={cottages} pricePerNight={100} />
-            <div className="text-center mt-8">
+            <header className="text-center mb-12 md:mb-14">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 max-w-2xl mx-auto">
+                Nos cottages et gîtes de charme
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Chaque hébergement Green Cottage est une invitation au ressourcement. Découvrez des lieux authentiques au cœur de la nature.
+              </p>
+            </header>
+            <FeaturedCottagesGrid cottages={cottages} pricePerNight={100} />
+            <div className="text-center mt-10">
               <Link href="/cottages">
-                <Button variant="outline">Voir tous les cottages</Button>
+                <Button variant="outline" className="focus-visible:ring-2 focus-visible:ring-gc-green focus-visible:ring-offset-2">
+                  Voir tous les cottages
+                </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Highlights */}
-        <section className="py-16 bg-muted/50">
-          <div className="container">
-            <h2 className="font-heading text-3xl font-bold mb-12 text-center">
-              Pourquoi choisir Green Cottage ?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-4xl mb-4">🏡</div>
-                <h3 className="font-heading font-semibold text-xl mb-2">Cottages authentiques</h3>
-                <p className="text-muted-foreground">
-                  Des hébergements soigneusement sélectionnés pour leur charme et leur confort
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl mb-4">✨</div>
-                <h3 className="font-heading font-semibold text-xl mb-2">Service premium</h3>
-                <p className="text-muted-foreground">
-                  Un accompagnement personnalisé pour rendre votre séjour mémorable
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl mb-4">🔒</div>
-                <h3 className="font-heading font-semibold text-xl mb-2">Réservation sécurisée</h3>
-                <p className="text-muted-foreground">
-                  Paiement 100% sécurisé avec Stripe, confirmation immédiate
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* À propos - template image gauche / contenu droite */}
+        <AboutSection />
 
         {/* Best-rated reviews from JSON */}
-        <BestReviewsSection reviews={bestReviews} slugToName={slugToName} />
+        <BestReviewsSection id="reviews" reviews={bestReviews} slugToName={slugToName} />
 
         {/* FAQ */}
         <section className="py-16 bg-muted/50">
@@ -114,18 +98,74 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-16">
-          <div className="container text-center">
-            <h2 className="font-heading text-3xl font-bold mb-4">
-              Prêt à réserver votre séjour ?
-            </h2>
-            <p className="text-muted-foreground mb-8">
-              Découvrez notre sélection de cottages et trouvez celui qui vous correspond
-            </p>
-            <Link href="/cottages">
-              <Button size="lg">Explorer les cottages</Button>
-            </Link>
+        {/* CTA - full-width image de fond + overlay vert foncé */}
+        <section
+          className="relative overflow-hidden"
+          aria-labelledby="cta-heading"
+        >
+          {/* Background */}
+          <div className="absolute inset-0">
+            <Image
+              src="/images/cta.webp"
+              alt="Paysage nature zen"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={false}
+            />
+
+            {/* Overlay vert + blur subtil */}
+            <div
+              className="absolute inset-0 bg-gradient-to-br 
+                 from-[#244026]/55 
+                 via-[#244026]/40 
+                 to-[#244026]/55 
+                 backdrop-blur-sm"
+              aria-hidden
+            />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 py-20 md:py-28 lg:py-32">
+            <div className="container text-center">
+              <h2
+                id="cta-heading"
+                className="font-heading 
+                   text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] 
+                   font-bold text-white leading-tight 
+                   mb-6 max-w-3xl mx-auto
+                   drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+              >
+                Réservez votre séjour
+                <br />
+                nature d&apos;exception dès
+                <br />
+                aujourd&apos;hui
+              </h2>
+
+              <p
+                className="text-white/90 text-lg md:text-xl 
+                   max-w-2xl mx-auto mb-10
+                   drop-shadow-[0_4px_14px_rgba(0,0,0,0.25)]"
+              >
+                Explorez notre collection de cottages de charme et gîtes authentiques.
+                Trouvez l&apos;hébergement parfait pour vos prochaines vacances nature.
+              </p>
+
+              <Link href="/cottages">
+                <Button
+                  size="lg"
+                  className="bg-gc-mustard text-gc-forest 
+                     hover:bg-gc-mustard/90
+                     focus-visible:ring-2 
+                     focus-visible:ring-gc-mustard 
+                     focus-visible:ring-offset-2 
+                     focus-visible:ring-offset-white/20"
+                >
+                  Découvrir nos cottages
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

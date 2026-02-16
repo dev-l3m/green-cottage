@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Menu, X, ChevronDown } from 'lucide-react';
+
+const HEADER_OFFSET = 100;
+
+function scrollToId(id: string) {
+  if (typeof document === 'undefined') return;
+  const el = document.getElementById(id);
+  if (el) {
+    const top = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
+const navLanding = [
+  { name: 'Nos gîtes', id: 'cottages', hash: '#cottages' },
+  { name: 'À propos', id: 'about', hash: '#about' },
+  { name: 'Avis', id: 'reviews', hash: '#reviews' },
+];
 
 const navigation = {
   main: [
@@ -48,6 +65,41 @@ export function Header() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdowns, setMobileDropdowns] = useState<Record<string, boolean>>({});
+  const [landingHash, setLandingHash] = useState('');
+
+  const handleLandingNavClick = useCallback((e: React.MouseEvent, id: string, hash: string) => {
+    e.preventDefault();
+    history.pushState(null, '', hash);
+    setLandingHash(id);
+    scrollToId(id);
+    setMobileMenuOpen(false);
+  }, []);
+
+  useEffect(() => {
+    const syncHash = () => {
+      if (typeof window === 'undefined') return;
+      const h = window.location.hash.replace('#', '');
+      setLandingHash(h);
+      if (pathname === '/' && h) {
+        requestAnimationFrame(() => scrollToId(h));
+      }
+    };
+    syncHash();
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+    if (hash) {
+      const raf = requestAnimationFrame(() => {
+        scrollToId(hash);
+        setLandingHash(hash);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [pathname]);
 
   const toggleMobileDropdown = (key: string) => {
     setMobileDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -76,15 +128,30 @@ export function Header() {
             className="h-8 w-auto flex-shrink-0"
             priority
           />
-          <span className="font-heading text-xl sm:text-2xl font-bold whitespace-nowrap hidden sm:inline">
-            <span className="text-gc-forest">L3M</span>
-            <span className="text-gc-green"> Green Cottage</span>
-          </span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-1">
-          {navigation.main.map((item) => {
+          {pathname === '/' ? (
+            navLanding.map((item) => {
+              const isLandingActive = landingHash === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={(e) => handleLandingNavClick(e, item.id, item.hash)}
+                  className={`text-sm font-medium transition-colors px-3 py-2 rounded-md ${
+                    isLandingActive
+                      ? 'text-gc-green bg-gc-green/10'
+                      : 'text-foreground hover:text-gc-green hover:bg-muted'
+                  }`}
+                >
+                  {item.name}
+                </button>
+              );
+            })
+          ) : (
+            navigation.main.map((item) => {
             if (item.dropdown) {
               return (
                 <DropdownMenu key={item.name}>
@@ -136,7 +203,8 @@ export function Header() {
                 {item.name}
               </Link>
             );
-          })}
+          })
+          )}
         </nav>
 
         {/* Desktop Auth */}
@@ -182,7 +250,26 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t bg-background">
           <nav className="container py-4 space-y-1">
-            {navigation.main.map((item) => {
+            {pathname === '/' ? (
+              navLanding.map((item) => {
+                const isLandingActive = landingHash === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={(e) => handleLandingNavClick(e, item.id, item.hash)}
+                    className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                      isLandingActive
+                        ? 'text-gc-green bg-gc-green/10'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                );
+              })
+            ) : (
+              navigation.main.map((item) => {
               if (item.dropdown) {
                 const isOpen = mobileDropdowns[item.name];
                 return (
@@ -231,7 +318,8 @@ export function Header() {
                   {item.name}
                 </Link>
               );
-            })}
+            })
+            )}
             <div className="pt-4 border-t mt-4 space-y-2">
               {session ? (
                 <>

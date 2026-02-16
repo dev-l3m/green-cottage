@@ -7,6 +7,7 @@ import type { ReviewWithSlug } from '@/lib/reviews';
 interface BestReviewsSectionProps {
   reviews: ReviewWithSlug[];
   slugToName: Record<string, string>;
+  id?: string;
 }
 
 function formatDate(iso: string): string {
@@ -24,11 +25,12 @@ function formatDate(iso: string): string {
 export function BestReviewsSection({
   reviews,
   slugToName,
+  id,
 }: BestReviewsSectionProps) {
   if (reviews.length === 0) return null;
 
   return (
-    <section className="py-16" aria-labelledby="best-reviews-heading">
+    <section id={id} className="py-16" aria-labelledby="best-reviews-heading">
       <div className="container">
         <h2
           id="best-reviews-heading"
