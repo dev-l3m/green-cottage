@@ -30,14 +30,22 @@ export function BestReviewsSection({
   if (reviews.length === 0) return null;
 
   return (
-    <section id={id} className="py-16" aria-labelledby="best-reviews-heading">
+    <section id={id} className="py-16 bg-[#f9f9f7]" aria-labelledby="best-reviews-heading">
       <div className="container">
-        <h2
-          id="best-reviews-heading"
-          className="font-heading text-3xl font-bold mb-8 text-center"
-        >
-          Ce que disent nos clients
-        </h2>
+        <header className="text-center mb-12">
+          <h2
+            id="best-reviews-heading"
+            className="font-heading text-3xl md:text-4xl font-bold text-gc-forest leading-tight mb-6 max-w-3xl mx-auto"
+          >
+            L&apos;expérience Green Cottage
+            <br />
+            racontée par nos clients
+          </h2>
+          <div className="w-full h-1 bg-gc-green/40 my-6" />
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+            Découvrez les avis authentiques de nos clients qui ont vécu l&apos;expérience Green Cottage
+          </p>
+        </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((review) => (
             <Card

@@ -33,7 +33,7 @@ export function AboutSection() {
   return (
     <section
       id="about"
-      className="py-20 bg-[#FAFAF7]"
+      className="py-20 bg-[#F3F5EE]"
       aria-labelledby="about-heading"
     >
       <div className="container">
@@ -41,14 +41,18 @@ export function AboutSection() {
           {/* Bloc image (gauche) */}
           <div className="order-2 lg:order-1">
             <div className="rounded-3xl overflow-hidden shadow-lg border border-border">
-              <div className="relative w-full h-[320px] sm:h-[400px] lg:h-[520px]">
+              <div className="relative w-full h-[600px]">
                 <Image
-                 src="/images/aprops.webp"
+                  src="/images/aprops.webp"
                   alt="Paysage de nature et cottages Green Cottage - hébergements au cœur de l'environnement"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority={false}
+                />
+                <div
+                  className="absolute inset-0 bg-[#F3F5EE]/25"
+                  aria-hidden
                 />
               </div>
             </div>

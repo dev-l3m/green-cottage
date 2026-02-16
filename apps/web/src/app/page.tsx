@@ -1,8 +1,8 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { Hero } from '@/components/home/Hero';
 import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
@@ -67,32 +67,46 @@ export default function HomePage() {
         <BestReviewsSection id="reviews" reviews={bestReviews} slugToName={slugToName} />
 
         {/* FAQ */}
-        <section className="py-16 bg-muted/50">
+        <section className="py-20 bg-[#F3F5EE]">
           <div className="container max-w-3xl">
             <h2 className="font-heading text-3xl font-bold mb-8 text-center">
-              Questions fréquentes
+            Questions fréquentes sur <br /> la location de nos gîtes
             </h2>
             <div className="space-y-4">
               {[
                 {
-                  q: 'Comment réserver ?',
-                  a: 'Sélectionnez vos dates, choisissez votre cottage et procédez au paiement sécurisé.',
+                  q: 'Comment réserver un gîte chez Green Cottage ?',
+                  a: 'La réservation est simple et rapide. Sélectionnez vos dates de séjour, choisissez le cottage qui correspond à vos besoins, et procédez au paiement sécurisé en ligne. Vous recevrez une confirmation immédiate par email avec tous les détails de votre réservation.',
                 },
                 {
-                  q: 'Quand puis-je arriver ?',
-                  a: 'Les heures d\'arrivée et de départ sont indiquées sur chaque fiche cottage (généralement 15h/11h).',
+                  q: 'Quelles sont les heures d\'arrivée et de départ ?',
+                  a: 'Les heures d\'arrivée et de départ sont indiquées sur chaque fiche descriptive de cottage. Généralement, l\'arrivée se fait à partir de 15h et le départ avant 11h. Des horaires flexibles peuvent être arrangés sur demande selon les disponibilités.',
                 },
                 {
-                  q: 'Puis-je annuler ma réservation ?',
-                  a: 'Les conditions d\'annulation varient selon le cottage. Consultez les détails lors de la réservation.',
+                  q: 'Quelle est la politique d\'annulation ?',
+                  a: 'Les conditions d\'annulation varient selon le cottage et la période de réservation. Nous proposons généralement une annulation gratuite jusqu\'à 14 jours avant l\'arrivée, avec des conditions flexibles pour garantir votre tranquillité d\'esprit.',
+                },
+                {
+                  q: 'Les gîtes sont-ils adaptés aux familles avec enfants ?',
+                  a: 'Oui, nos gîtes sont conçus pour accueillir les familles. La plupart disposent de plusieurs chambres, d\'équipements bébé sur demande (lits parapluie, chaises hautes) et d\'espaces extérieurs sécurisés pour les enfants.',
+                },
+                {
+                  q: 'Les animaux de compagnie sont-ils acceptés ?',
+                  a: 'Certains de nos gîtes acceptent les animaux de compagnie. Les conditions (nombre, taille) sont précisées sur chaque fiche cottage. Merci de nous contacter ou de consulter les détails avant de réserver.',
                 },
               ].map((faq, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <h3 className="font-heading font-semibold text-lg mb-2">{faq.q}</h3>
+                <details
+                  key={i}
+                  className="group rounded-lg bg-white shadow-sm border border-border overflow-hidden"
+                >
+                  <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none font-heading font-semibold text-foreground hover:bg-muted/50 transition-colors [&::-webkit-details-marker]:hidden">
+                    <span>{faq.q}</span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <div className="px-5 pb-5 pt-0">
                     <p className="text-muted-foreground">{faq.a}</p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </details>
               ))}
             </div>
           </div>
@@ -114,13 +128,9 @@ export default function HomePage() {
               priority={false}
             />
 
-            {/* Overlay vert + blur subtil */}
+            {/* Overlay vert olive foncé - template full cover */}
             <div
-              className="absolute inset-0 bg-gradient-to-br 
-                 from-[#244026]/55 
-                 via-[#244026]/40 
-                 to-[#244026]/55 
-                 backdrop-blur-sm"
+              className="absolute inset-0 bg-[#2e4a3b]/80"
               aria-hidden
             />
           </div>

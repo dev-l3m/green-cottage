@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { HeroSearchForm } from '@/components/home/HeroSearchForm';
+import { useHeaderUi } from '@/components/ui/header-scroll-context';
 
 const HEADER_OFFSET = 100;
 
@@ -63,6 +66,7 @@ const navigation = {
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { isHeaderScrolled } = useHeaderUi();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdowns, setMobileDropdowns] = useState<Record<string, boolean>>({});
   const [landingHash, setLandingHash] = useState('');
@@ -112,10 +116,24 @@ export function Header() {
     return pathname.startsWith(href);
   };
 
+  const isHome = pathname === '/';
+  const headerScrolledStyle = isHeaderScrolled && isHome;
+  const headerClassName = headerScrolledStyle
+    ? 'sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md shadow-md transition-all duration-300 py-3'
+    : isHome
+      ? 'sticky top-0 z-50 w-full border-b border-transparent bg-transparent transition-all duration-300 py-5'
+      : 'sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60';
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo - flex-shrink-0 so "Green Cottage" stays visible on mobile */}
+    <header className={headerClassName}>
+      <div
+        className={cn(
+          'container flex items-center',
+          isHome ? 'gap-4' : 'justify-between',
+          headerScrolledStyle ? 'h-14' : 'h-16'
+        )}
+      >
+        {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 flex-shrink-0"
@@ -130,8 +148,24 @@ export function Header() {
           />
         </Link>
 
+        {/* Desktop SearchForm - visible when scrolled on home (md+) */}
+        {isHome && (
+          <div
+            className={cn(
+              'hidden md:flex flex-1 justify-center min-w-0 mx-2 lg:mx-4 transition-all duration-500',
+              headerScrolledStyle
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-2 pointer-events-none'
+            )}
+          >
+            <div className="w-full max-w-[760px]">
+              <HeroSearchForm variant="header" />
+            </div>
+          </div>
+        )}
+
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-1">
+        <nav className="hidden lg:flex items-center space-x-1 flex-shrink-0">
           {pathname === '/' ? (
             navLanding.map((item) => {
               const isLandingActive = landingHash === item.id;
@@ -140,11 +174,10 @@ export function Header() {
                   key={item.id}
                   type="button"
                   onClick={(e) => handleLandingNavClick(e, item.id, item.hash)}
-                  className={`text-sm font-medium transition-colors px-3 py-2 rounded-md ${
-                    isLandingActive
-                      ? 'text-gc-green bg-gc-green/10'
-                      : 'text-foreground hover:text-gc-green hover:bg-muted'
-                  }`}
+                  className={cn(
+                    'text-sm font-medium transition-colors px-3 py-2 rounded-md text-gray-900 hover:text-gc-green hover:bg-muted',
+                    isLandingActive && 'text-gc-green bg-gc-green/10'
+                  )}
                 >
                   {item.name}
                 </button>
@@ -212,18 +245,27 @@ export function Header() {
           {session ? (
             <>
               <Link href="/account">
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-900 hover:text-gc-green"
+                >
                   Mon compte
                 </Button>
               </Link>
-              {(session.user as any)?.role === 'ADMIN' && (
+              {(session.user as { role?: string })?.role === 'ADMIN' && (
                 <Link href="/admin">
                   <Button variant="outline" size="sm">
                     Admin
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" onClick={() => signOut()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-900 hover:text-gc-green"
+                onClick={() => signOut()}
+              >
                 Déconnexion
               </Button>
             </>
@@ -238,7 +280,7 @@ export function Header() {
         <Button
           variant="ghost"
           size="sm"
-          className="lg:hidden"
+          className="lg:hidden text-gray-900 hover:text-gc-green"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -258,11 +300,10 @@ export function Header() {
                     key={item.id}
                     type="button"
                     onClick={(e) => handleLandingNavClick(e, item.id, item.hash)}
-                    className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-                      isLandingActive
-                        ? 'text-gc-green bg-gc-green/10'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
+                    className={cn(
+                      'block w-full text-left px-4 py-3 text-sm font-medium rounded-md transition-colors text-gray-900 hover:text-gc-green hover:bg-muted',
+                      isLandingActive && 'text-gc-green bg-gc-green/10'
+                    )}
                   >
                     {item.name}
                   </button>
