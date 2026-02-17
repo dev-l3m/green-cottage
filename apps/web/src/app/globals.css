@@ -82,3 +82,15 @@
 .animate-scroll-horizontal:hover {
   animation-play-state: paused;
 }
+
+.green-divider {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(125, 181, 73, 0.9),
+    transparent
+  );
+}
+

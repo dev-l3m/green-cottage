@@ -76,7 +76,7 @@ function FeaturedCottageCard({
             sizes="(max-width: 768px) 100vw, 50vw"
           />
           <span
-            className="absolute top-3 right-3 rounded-lg bg-amber-500/95 px-3 py-1.5 text-sm font-semibold text-amber-950 shadow-sm"
+            className="absolute top-3 right-3 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm"
             aria-label={`Prix: ${pricePerNight} euros par nuit`}
           >
             {pricePerNight}€/nuit
@@ -102,7 +102,7 @@ function FeaturedCottageCard({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-full bg-gc-green/15 px-3 py-0.5 text-xs font-medium text-gc-green"
+                  className="inline-flex items-center text-xs px-3 py-1.5 bg-secondary/10 text-secondary font-medium rounded-full border border-secondary/20"
                 >
                   {tag}
                 </span>
@@ -122,7 +122,7 @@ function FeaturedCottageCard({
             ) : (
               <span aria-hidden />
             )}
-            <span className="ml-auto shrink-0 inline-flex h-9 items-center justify-center rounded-lg border border-amber-500/50 bg-amber-50 px-4 text-sm font-medium text-amber-800 ring-offset-background transition-colors hover:bg-amber-100 hover:text-amber-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
+            <span className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
               Voir
             </span>
           </div>

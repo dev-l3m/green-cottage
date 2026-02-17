@@ -45,6 +45,7 @@ export default function HomePage() {
               <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 max-w-2xl mx-auto">
                 Nos cottages et gîtes de charme
               </h2>
+              <div className="green-divider w-32 mb-12 mx-auto" />
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 Chaque hébergement Green Cottage est une invitation au ressourcement. Découvrez des lieux authentiques au cœur de la nature.
               </p>
@@ -70,8 +71,9 @@ export default function HomePage() {
         <section className="py-20 bg-[#F3F5EE]">
           <div className="container max-w-3xl">
             <h2 className="font-heading text-3xl font-bold mb-8 text-center">
-            Questions fréquentes sur <br /> la location de nos gîtes
+            Questions fréquentes sur la <br /> location de nos gîtes
             </h2>
+            <div className="green-divider w-32 mb-12 mx-auto" />
             <div className="space-y-4">
               {[
                 {

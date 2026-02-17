@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -6,7 +7,19 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-heading font-bold text-lg mb-4 text-white">Green Cottage</h3>
+          <Link
+          href="/"
+          className="flex items-center gap-2 flex-shrink-0"
+        >
+          <Image
+            src="/logo_l3m.png"
+            alt="L3M Logo"
+            width={70}
+            height={70}
+            className="h-20 w-auto flex-shrink-0"
+            priority
+          />
+        </Link>
             <p className="text-sm text-white/80">
               Votre destination pour des séjours inoubliables dans des cottages de charme.
             </p>
