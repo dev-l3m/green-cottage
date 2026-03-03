@@ -9,6 +9,7 @@ import { StayConfigModal } from './StayConfigModal';
 
 interface BookingCardProps {
   slug: string;
+  pricePerNight?: number;
   capacity?: number;
   arrival?: string;
   departure?: string;
@@ -16,6 +17,7 @@ interface BookingCardProps {
 
 export function BookingCard({
   slug,
+  pricePerNight = 100,
   capacity = 4,
   arrival = '17h00',
   departure = '10h00',
@@ -29,7 +31,7 @@ export function BookingCard({
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <span className="text-2xl font-bold">
-                100€
+                {pricePerNight.toFixed(0)}€
                 <span className="text-base font-normal text-muted-foreground">/nuit</span>
               </span>
             </div>

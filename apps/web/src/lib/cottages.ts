@@ -94,32 +94,34 @@ export type CottageForPage = {
 };
 
 /**
- * Returns cottage by slug from DB, or creates it from JSON if present.
- * If the DB is unreachable (e.g. wrong DATABASE_URL), falls back to JSON so the page still renders.
+ * Returns cottage by slug.
+ * Priority: DB first (for fully dynamic slugs), then JSON fallback.
  */
 export async function getCottageBySlug(slug: string): Promise<CottageForPage | null> {
   const fromJson = cottagesList.find((c) => c.slug === slug);
-  if (!fromJson) return null;
 
   try {
-    let cottage = await prisma.cottage.findUnique({
+    // DB is the source of truth for dynamic content/slugs.
+    const fromDb = await prisma.cottage.findFirst({
       where: { slug, isActive: true },
     });
+    if (fromDb) return fromDb as CottageForPage;
 
-    if (!cottage) {
-      const data = cottageFromJsonToDb(fromJson);
-      await prisma.cottage.upsert({
-        where: { slug },
-        update: {},
-        create: data,
-      });
-      cottage = await prisma.cottage.findUnique({
-        where: { slug },
-      });
-    }
+    if (!fromJson) return null;
+
+    const data = cottageFromJsonToDb(fromJson);
+    await prisma.cottage.upsert({
+      where: { slug },
+      update: {},
+      create: data,
+    });
+    const cottage = await prisma.cottage.findUnique({
+      where: { slug },
+    });
 
     return cottage as CottageForPage;
   } catch {
+    if (!fromJson) return null;
     // DB unreachable (e.g. wrong DATABASE_URL like db.prisma.io) — serve from JSON so page doesn't 500
     const data = cottageFromJsonToDb(fromJson);
     return {

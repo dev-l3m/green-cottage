@@ -197,6 +197,7 @@ export default async function CottageDetailPage({ params }: { params: { slug: st
 
             <BookingCard
               slug={cottage.slug}
+              pricePerNight={cottage.basePrice}
               capacity={cottage.capacity}
               arrival={cottage.checkInTime ?? '17h00'}
               departure={cottage.checkOutTime ?? '10h00'}

@@ -2,6 +2,13 @@
 const path = require('path');
 
 const nextConfig = {
+  webpack: (config, { dev, isServer }) => {
+    // Avoid noisy *.css.map 404 requests in local dev.
+    if (dev && !isServer) {
+      config.devtool = false;
+    }
+    return config;
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -30,10 +37,10 @@ const nextConfig = {
     },
     // Racine du monorepo pour que le file tracing inclue node_modules (styled-jsx, etc.)
     outputFileTracingRoot: path.join(__dirname, '..', '..'),
-  },
-  // Inclure explicitement styled-jsx (requis par Next) dans le bundle serverless
-  outputFileTracingIncludes: {
-    '/**': ['node_modules/styled-jsx/**', '../../node_modules/styled-jsx/**'],
+    // Inclure explicitement styled-jsx (requis par Next) dans le bundle serverless
+    outputFileTracingIncludes: {
+      '/**': ['node_modules/styled-jsx/**', '../../node_modules/styled-jsx/**'],
+    },
   },
 };
 

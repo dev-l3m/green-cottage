@@ -42,11 +42,11 @@ export function CottageCard({
           />
         </div>
         <CardContent className="p-4">
-          <h3 className="font-heading font-semibold text-lg mb-2 line-clamp-1">
+          <h3 className="font-heading font-semibold text-lg mb-2">
             {title}
           </h3>
           {summary && (
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            <p className="text-sm text-muted-foreground mb-4">
               {summary}
             </p>
           )}

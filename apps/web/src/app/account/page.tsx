@@ -12,10 +12,14 @@ import Link from 'next/link';
 import { Download } from 'lucide-react';
 
 export default function AccountPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -24,6 +28,10 @@ export default function AccountPage() {
     }
 
     if (session) {
+      setProfileForm({
+        name: session.user?.name ?? '',
+        email: session.user?.email ?? '',
+      });
       fetchBookings();
     }
   }, [session, status, router]);
@@ -39,6 +47,44 @@ export default function AccountPage() {
       console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileMessage(null);
+    setProfileError(null);
+
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: profileForm.name,
+          email: profileForm.email,
+        }),
+      });
+
+      const payload = (await res.json()) as { name?: string; email?: string; error?: string };
+      if (!res.ok) {
+        setProfileError(payload.error ?? 'Impossible de mettre à jour le profil');
+        setProfileSaving(false);
+        return;
+      }
+
+      await update({
+        user: {
+          name: payload.name ?? profileForm.name,
+          email: payload.email ?? profileForm.email,
+        },
+      });
+
+      setProfileMessage('Informations mises à jour avec succès.');
+    } catch {
+      setProfileError('Une erreur est survenue pendant la mise à jour.');
+    } finally {
+      setProfileSaving(false);
     }
   };
 
@@ -124,14 +170,46 @@ export default function AccountPage() {
                 <CardTitle>Informations</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">
-                  <strong>Email:</strong> {session?.user?.email}
-                </p>
-                {session?.user?.name && (
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Nom:</strong> {session.user.name}
-                  </p>
-                )}
+                <form onSubmit={handleProfileSave} className="space-y-4">
+                  <div>
+                    <label htmlFor="account-name" className="block text-sm font-medium mb-1">
+                      Nom
+                    </label>
+                    <input
+                      id="account-name"
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      value={profileForm.name}
+                      onChange={(e) =>
+                        setProfileForm((s) => ({ ...s, name: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="account-email" className="block text-sm font-medium mb-1">
+                      Email
+                    </label>
+                    <input
+                      id="account-email"
+                      type="email"
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      value={profileForm.email}
+                      onChange={(e) =>
+                        setProfileForm((s) => ({ ...s, email: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  {profileMessage && (
+                    <p className="text-sm text-green-700">{profileMessage}</p>
+                  )}
+                  {profileError && (
+                    <p className="text-sm text-destructive">{profileError}</p>
+                  )}
+                  <Button type="submit" size="sm" disabled={profileSaving}>
+                    {profileSaving ? 'Enregistrement...' : 'Mettre à jour'}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>

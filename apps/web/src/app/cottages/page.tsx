@@ -7,8 +7,9 @@ import Image from 'next/image';
 import { siteImages } from '@/lib/assets/images';
 import { Leaf } from 'lucide-react';
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Nos gîtes et studios | L3M Green Cottage',
@@ -45,8 +46,38 @@ function sortCottages(cottages: CottageListItem[]): CottageListItem[] {
   return ordered;
 }
 
-export default function CottagesPage() {
-  const rawCottages = getCottagesForListing();
+async function getDynamicCottagesForListing(): Promise<CottageListItem[]> {
+  try {
+    const cottages = await prisma.cottage.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        basePrice: true,
+        capacity: true,
+        images: true,
+      },
+    });
+
+    return cottages.map((cottage) => ({
+      id: cottage.id,
+      slug: cottage.slug,
+      title: cottage.title,
+      summary: cottage.summary,
+      basePrice: cottage.basePrice,
+      image: cottage.images[0] ?? '',
+      capacity: cottage.capacity,
+    }));
+  } catch {
+    return getCottagesForListing();
+  }
+}
+
+export default async function CottagesPage() {
+  const rawCottages = await getDynamicCottagesForListing();
   const cottages = sortCottages(rawCottages);
 
   return (

@@ -45,6 +45,8 @@ const navigation = {
         { name: 'Gîte Bruyère', href: '/cottages/bruyere' },
         { name: 'Gîte Petit Pierre', href: '/cottages/petit-pierre' },
         { name: 'Gîte Télégraphe', href: '/cottages/telegaphe' },
+        { name: 'Cottage Moderne', href: '/cottages/cottage-moderne' },
+        { name: 'Cottage de Charme', href: '/cottages/cottage-charme' },
       ],
     },
     {
@@ -117,6 +119,7 @@ export function Header() {
   };
 
   const isHome = pathname === '/';
+  const isAdminArea = pathname.startsWith('/admin');
   const headerScrolledStyle = isHeaderScrolled && isHome;
   const headerClassName = headerScrolledStyle
     ? 'sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md shadow-md transition-all duration-300 py-3'
@@ -129,7 +132,7 @@ export function Header() {
       <div
         className={cn(
           'container flex items-center',
-          isHome ? 'gap-4' : 'justify-between',
+          isHome && !isAdminArea ? 'gap-4' : 'justify-between',
           headerScrolledStyle ? 'h-14' : 'h-16'
         )}
       >
@@ -149,7 +152,7 @@ export function Header() {
         </Link>
 
         {/* Desktop SearchForm - visible when scrolled on home (md+) */}
-        {isHome && (
+        {isHome && !isAdminArea && (
           <div
             className={cn(
               'hidden md:flex flex-1 justify-center min-w-0 mx-2 lg:mx-4 transition-all duration-500',
@@ -165,6 +168,7 @@ export function Header() {
         )}
 
         {/* Desktop Navigation */}
+        {!isAdminArea && (
         <nav className="hidden lg:flex items-center space-x-1 flex-shrink-0">
           {pathname === '/' ? (
             navLanding.map((item) => {
@@ -239,9 +243,10 @@ export function Header() {
           })
           )}
         </nav>
+        )}
 
         {/* Desktop Auth */}
-        <div className="hidden lg:flex items-center space-x-4">
+        <div className={cn('items-center space-x-4', isAdminArea ? 'flex' : 'hidden lg:flex')}>
           {session ? (
             <>
               <Link href="/account">
@@ -277,19 +282,21 @@ export function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="lg:hidden text-gray-900 hover:text-gc-green"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
+        {!isAdminArea && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden text-gray-900 hover:text-gc-green"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        )}
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
+      {!isAdminArea && mobileMenuOpen && (
         <div className="lg:hidden border-t bg-background">
           <nav className="container py-4 space-y-1">
             {pathname === '/' ? (

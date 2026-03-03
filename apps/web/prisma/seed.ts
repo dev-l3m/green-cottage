@@ -1,9 +1,29 @@
+/// <reference types="node" />
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const prisma = new PrismaClient();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectDir = path.join(__dirname, '..');
+
+function loadEnvFileIfExists(filePath: string) {
+  if (!fs.existsSync(filePath)) return;
+  const processWithLoadEnv = process as NodeJS.Process & {
+    loadEnvFile?: (path?: string) => void;
+  };
+  processWithLoadEnv.loadEnvFile?.(filePath);
+}
+
+// Load env from apps/web/.env.local then .env for script execution.
+loadEnvFileIfExists(path.join(projectDir, '.env.local'));
+loadEnvFileIfExists(path.join(projectDir, '.env'));
+if (!process.env.DATABASE_URL && process.env.PRISMA_DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.PRISMA_DATABASE_URL;
+}
 
 type CottageJson = {
   slug: string;
@@ -18,14 +38,14 @@ type CottageJson = {
   amenities?: string[];
 };
 
-function parseTime(text: string | undefined): string {
-  if (!text) return '17:00';
-  const match = text.match(/(\d{1,2})h(\d{2})/);
-  return match ? `${match[1].padStart(2, '0')}:${match[2]}` : '17:00';
+function parseTime(text: string | undefined, fallback: string): string {
+  if (!text) return fallback;
+  const match = text.match(/(\d{1,2})[:h](\d{2})/);
+  return match ? `${match[1].padStart(2, '0')}:${match[2]}` : fallback;
 }
 
 async function seedCottagesFromJson() {
-  const jsonPath = path.join(__dirname, '..', 'src', 'content', 'cottages.json');
+  const jsonPath = path.join(projectDir, 'src', 'content', 'cottages.json');
   if (!fs.existsSync(jsonPath)) {
     console.warn('cottages.json not found at', jsonPath, '- skipping cottage seed from JSON');
     return;
@@ -46,8 +66,8 @@ async function seedCottagesFromJson() {
         capacity: c.facts?.capacite_max ?? 4,
         images: images.length ? images : ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800'],
         amenities: Array.isArray(c.amenities) && c.amenities.length > 0 ? c.amenities : ['WiFi', 'Cuisine équipée', 'Parking', 'Jardin'],
-        checkInTime: parseTime(c.practicalInfo?.arrivee),
-        checkOutTime: parseTime(c.practicalInfo?.depart),
+        checkInTime: parseTime(c.practicalInfo?.arrivee, '17:00'),
+        checkOutTime: parseTime(c.practicalInfo?.depart, '11:00'),
         isActive: true,
       },
       create: {
@@ -63,8 +83,8 @@ async function seedCottagesFromJson() {
         cleaningFee: 30,
         images: images.length ? images : ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800'],
         amenities: Array.isArray(c.amenities) && c.amenities.length > 0 ? c.amenities : ['WiFi', 'Cuisine équipée', 'Parking', 'Jardin'],
-        checkInTime: parseTime(c.practicalInfo?.arrivee),
-        checkOutTime: parseTime(c.practicalInfo?.depart),
+        checkInTime: parseTime(c.practicalInfo?.arrivee, '17:00'),
+        checkOutTime: parseTime(c.practicalInfo?.depart, '11:00'),
         isActive: true,
       },
     });
@@ -74,12 +94,19 @@ async function seedCottagesFromJson() {
 
 async function main() {
   console.log('Seeding database...');
+  const resetDemoUsers = process.env.RESET_DEMO_USERS === 'true';
 
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@green-cottage.com' },
-    update: {},
+    update: resetDemoUsers
+      ? {
+          passwordHash: adminPassword,
+          name: 'Admin',
+          role: 'ADMIN',
+        }
+      : {},
     create: {
       email: 'admin@green-cottage.com',
       passwordHash: adminPassword,
@@ -94,7 +121,13 @@ async function main() {
   const customerPassword = await bcrypt.hash('customer123', 10);
   const customer = await prisma.user.upsert({
     where: { email: 'customer@example.com' },
-    update: {},
+    update: resetDemoUsers
+      ? {
+          passwordHash: customerPassword,
+          name: 'John Doe',
+          role: 'CUSTOMER',
+        }
+      : {},
     create: {
       email: 'customer@example.com',
       passwordHash: customerPassword,
@@ -135,7 +168,7 @@ async function main() {
 main()
   .catch((e) => {
     console.error(e);
-    process.exit(1);
+    throw e;
   })
   .finally(async () => {
     await prisma.$disconnect();

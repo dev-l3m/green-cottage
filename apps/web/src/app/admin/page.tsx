@@ -1,30 +1,32 @@
-'use client';
+import { prisma } from '@/lib/prisma';
 
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    cottages: 0,
-    bookings: 0,
-    reviews: 0,
-    revenue: 0,
-  });
-  const [loading, setLoading] = useState(true);
+async function getDashboardStats() {
+  const [cottages, bookings, reviews, paidBookings] = await Promise.all([
+    prisma.cottage.count({
+      where: { isActive: true },
+    }),
+    prisma.booking.count(),
+    prisma.publicReview.count({
+      where: { status: 'PUBLISHED' },
+    }),
+    prisma.booking.aggregate({
+      where: { status: 'PAID' },
+      _sum: { total: true },
+    }),
+  ]);
 
-  useEffect(() => {
-    // TODO: Fetch stats from API
-    setStats({
-      cottages: 0,
-      bookings: 0,
-      reviews: 0,
-      revenue: 0,
-    });
-    setLoading(false);
-  }, []);
+  return {
+    cottages,
+    bookings,
+    reviews,
+    revenue: paidBookings._sum.total ?? 0,
+  };
+}
 
-  if (loading) {
-    return <p>Chargement...</p>;
-  }
+export default async function AdminDashboard() {
+  const stats = await getDashboardStats();
 
   return (
     <div>

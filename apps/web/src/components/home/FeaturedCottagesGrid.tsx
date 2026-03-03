@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Users } from 'lucide-react';
 
 export type FeaturedCottage = {
-  id: number;
+  id: string | number;
   slug: string;
   name: string;
   summary?: string;

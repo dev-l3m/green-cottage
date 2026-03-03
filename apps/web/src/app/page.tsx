@@ -9,10 +9,10 @@ import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
 import { AboutSection } from '@/components/home/AboutSection';
 import { BestReviewsSection } from '@/components/reviews/BestReviewsSection';
 import { getBestRatedReviews } from '@/lib/reviews';
-import cottagesData from '@/content/cottages.json';
+import { prisma } from '@/lib/prisma';
 
 type CottageFromJSON = {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   summary?: string;
@@ -22,11 +22,46 @@ type CottageFromJSON = {
   badges?: string[];
 };
 
-export default function HomePage() {
-  const cottages = cottagesData as CottageFromJSON[];
+export const dynamic = 'force-dynamic';
+
+async function getHomeCottages(): Promise<CottageFromJSON[]> {
+  try {
+    const cottages = await prisma.cottage.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        description: true,
+        capacity: true,
+        images: true,
+      },
+    });
+
+    return cottages.map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      name: c.title,
+      summary: c.summary ?? undefined,
+      description: c.description ?? undefined,
+      facts: { capacite_max: c.capacity },
+      images: {
+        hero: c.images[0] ?? '',
+        gallery: c.images.slice(1),
+      },
+      badges: [],
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const cottages = await getHomeCottages();
   const bestReviews = getBestRatedReviews(6);
-  const allCottages = cottagesData as CottageFromJSON[];
-  const slugToName = allCottages.reduce(
+  const slugToName = cottages.reduce(
     (acc, c) => ({ ...acc, [c.slug]: c.name }),
     {} as Record<string, string>
   );

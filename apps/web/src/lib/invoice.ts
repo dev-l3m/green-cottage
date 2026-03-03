@@ -40,10 +40,37 @@ export async function generateInvoicePDF(booking: Booking & { invoice: Invoice |
   }
 
   const invoiceNumber = booking.invoice?.invoiceNumber || (await generateInvoiceNumber());
-  const companyName = process.env.INVOICE_COMPANY_NAME || 'Green Cottage / L3M Holding';
-  const companyAddress = process.env.INVOICE_COMPANY_ADDRESS || '';
-  const companyEmail = process.env.INVOICE_COMPANY_EMAIL || '';
-  const companyPhone = process.env.INVOICE_COMPANY_PHONE || '';
+  const settingsRows = await prisma.siteContent.findMany({
+    where: {
+      key: {
+        in: [
+          'invoice_company_name',
+          'invoice_company_address',
+          'invoice_company_email',
+          'invoice_company_phone',
+        ],
+      },
+    },
+    select: { key: true, value: true },
+  });
+  const settings = new Map(settingsRows.map((r) => [r.key, r.value as { text?: string }]));
+
+  const companyName =
+    settings.get('invoice_company_name')?.text ||
+    process.env.INVOICE_COMPANY_NAME ||
+    'Green Cottage / L3M Holding';
+  const companyAddress =
+    settings.get('invoice_company_address')?.text ||
+    process.env.INVOICE_COMPANY_ADDRESS ||
+    '';
+  const companyEmail =
+    settings.get('invoice_company_email')?.text ||
+    process.env.INVOICE_COMPANY_EMAIL ||
+    '';
+  const companyPhone =
+    settings.get('invoice_company_phone')?.text ||
+    process.env.INVOICE_COMPANY_PHONE ||
+    '';
 
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const buffers: Buffer[] = [];
