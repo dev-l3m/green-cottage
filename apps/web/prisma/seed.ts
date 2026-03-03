@@ -95,6 +95,19 @@ async function seedCottagesFromJson() {
 async function main() {
   console.log('Seeding database...');
   const resetDemoUsers = process.env.RESET_DEMO_USERS === 'true';
+  const runOnceMode = process.env.SEED_RUN_ONCE === 'true';
+  const seedMarkerKey = process.env.SEED_MARKER_KEY || 'seed_deploy_once_v1';
+
+  if (runOnceMode) {
+    const marker = await prisma.siteContent.findUnique({
+      where: { key: seedMarkerKey },
+      select: { id: true },
+    });
+    if (marker) {
+      console.log(`Seed marker "${seedMarkerKey}" already exists. Skipping seed.`);
+      return;
+    }
+  }
 
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
@@ -161,6 +174,20 @@ async function main() {
       },
     },
   });
+
+  if (runOnceMode) {
+    await prisma.siteContent.upsert({
+      where: { key: seedMarkerKey },
+      update: {
+        value: { doneAt: new Date().toISOString() },
+      },
+      create: {
+        key: seedMarkerKey,
+        value: { doneAt: new Date().toISOString() },
+      },
+    });
+    console.log(`Seed marker created: ${seedMarkerKey}`);
+  }
 
   console.log('Seeding completed!');
 }

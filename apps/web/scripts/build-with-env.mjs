@@ -88,6 +88,23 @@ if (r.status !== 0) {
   process.stderr.write('[build-with-env] prisma migrate deploy failed (continuing with next build)\n');
 }
 
+// 2.5 Optional one-time seed for deployment (guarded by DB marker).
+// Enable with Vercel env: RUN_DEPLOY_SEED=true
+if (env.RUN_DEPLOY_SEED === 'true') {
+  process.stdout.write('[build-with-env] RUN_DEPLOY_SEED=true, running db:seed in run-once mode...\n');
+  env.SEED_RUN_ONCE = 'true';
+  if (!env.SEED_MARKER_KEY) {
+    env.SEED_MARKER_KEY = 'seed_deploy_once_v1';
+  }
+  const seedShell = isWin ? 'pnpm db:seed' : 'pnpm db:seed';
+  const seedResult = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', seedShell]);
+  if (seedResult.status !== 0) {
+    process.stderr.write(
+      `[build-with-env] db:seed failed with status ${seedResult.status} (continuing build)\n`
+    );
+  }
+}
+
 process.stdout.write('[build-with-env] Running next build...\n');
 
 // 3. Next.js build (toujours via npx depuis apps/web)
