@@ -3,12 +3,22 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
 export default function AdminCottagesPage() {
   const [cottages, setCottages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchCottages();
@@ -28,19 +38,22 @@ export default function AdminCottagesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce cottage ?')) return;
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/cottages/${id}`, {
+      const res = await fetch(`/api/admin/cottages/${deleteTarget.id}`, {
         method: 'DELETE',
       });
 
       if (res.ok) {
+        setDeleteTarget(null);
         fetchCottages();
       }
     } catch (error) {
       console.error('Error deleting cottage:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -82,7 +95,12 @@ export default function AdminCottagesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(cottage.id)}
+                      onClick={() =>
+                        setDeleteTarget({
+                          id: cottage.id,
+                          title: cottage.title,
+                        })
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -93,6 +111,41 @@ export default function AdminCottagesPage() {
           ))}
         </div>
       )}
+
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer ce cottage ?</DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible.
+              {deleteTarget?.title ? ` Cottage concerné : ${deleteTarget.title}.` : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Suppression...' : 'Supprimer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

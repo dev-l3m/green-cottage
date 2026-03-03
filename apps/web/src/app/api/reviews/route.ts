@@ -23,9 +23,9 @@ function sanitizeComment(text: string): string {
     .trim();
 }
 
-// Simple in-memory rate limit: IP -> last request timestamp (MVP)
+// Simple in-memory rate limit: IP + slug -> last request timestamp (MVP)
 const rateLimitMap = new Map<string, number>();
-const RATE_LIMIT_MS = 60_000; // 1 minute between submits per IP
+const RATE_LIMIT_MS = 15_000; // 15 seconds between submits for same IP and same cottage
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -69,16 +69,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = getClientIp(request);
-    const now = Date.now();
-    const last = rateLimitMap.get(ip);
-    if (last != null && now - last < RATE_LIMIT_MS) {
-      return NextResponse.json(
-        { error: 'Veuillez patienter avant de soumettre un nouvel avis.' },
-        { status: 429 }
-      );
-    }
-
     const body = await request.json();
     const parsed = postSchema.safeParse(body);
     if (!parsed.success) {
@@ -86,7 +76,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Validation failed', details: msg }, { status: 400 });
     }
 
+    const ip = getClientIp(request);
+    const now = Date.now();
     const { slug, rating, author, comment } = parsed.data;
+    const rateLimitKey = `${ip}:${slug}`;
+    const last = rateLimitMap.get(rateLimitKey);
+    if (last != null && now - last < RATE_LIMIT_MS) {
+      return NextResponse.json(
+        { error: 'Veuillez patienter quelques secondes avant de soumettre un nouvel avis.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil((RATE_LIMIT_MS - (now - last)) / 1000)),
+          },
+        }
+      );
+    }
+
     const cottage = await prisma.cottage.findUnique({
       where: { slug },
       select: { id: true },
@@ -107,7 +113,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    rateLimitMap.set(ip, now);
+    // Keep map size bounded in long-lived runtimes.
+    if (rateLimitMap.size > 5000) {
+      rateLimitMap.clear();
+    }
+    rateLimitMap.set(rateLimitKey, now);
     return NextResponse.json({ success: true });
   } catch (error) {
     const isTableMissing =
