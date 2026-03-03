@@ -24,17 +24,7 @@ const COTTAGES_OPTIONS: CottageOption[] = (
   cottagesData as { slug: string; name: string }[]
 ).map((c) => ({ slug: c.slug, name: c.name }));
 
-const EXTRA_COTTAGES_OPTIONS: CottageOption[] = [
-  { slug: 'cottage-moderne', name: 'Cottage Moderne' },
-  { slug: 'cottage-charme', name: 'Cottage de Charme' },
-];
-
-const ALL_COTTAGES_OPTIONS: CottageOption[] = [
-  ...COTTAGES_OPTIONS,
-  ...EXTRA_COTTAGES_OPTIONS.filter(
-    (extra) => !COTTAGES_OPTIONS.some((c) => c.slug === extra.slug)
-  ),
-];
+const ALL_COTTAGES_OPTIONS: CottageOption[] = COTTAGES_OPTIONS;
 
 type HeaderScrollContextValue = {
   isHeaderScrolled: boolean;

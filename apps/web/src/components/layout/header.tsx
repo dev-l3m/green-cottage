@@ -45,8 +45,6 @@ const navigation = {
         { name: 'Gîte Bruyère', href: '/cottages/bruyere' },
         { name: 'Gîte Petit Pierre', href: '/cottages/petit-pierre' },
         { name: 'Gîte Télégraphe', href: '/cottages/telegaphe' },
-        { name: 'Cottage Moderne', href: '/cottages/cottage-moderne' },
-        { name: 'Cottage de Charme', href: '/cottages/cottage-charme' },
       ],
     },
     {
