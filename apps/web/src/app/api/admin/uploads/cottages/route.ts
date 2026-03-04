@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 import { requireAdmin } from '@/lib/middleware';
 
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
@@ -42,6 +43,25 @@ export async function POST(request: NextRequest) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const safeBaseName = sanitizeBaseName(originalName) || 'cottage-image';
     const fileName = `${Date.now()}-${safeBaseName}-${randomUUID().slice(0, 8)}${extension}`;
+
+    // On Vercel, filesystem is ephemeral/read-only for persistent uploads.
+    // Use Vercel Blob if token is available.
+    if (process.env.VERCEL === '1') {
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return NextResponse.json(
+          { error: 'BLOB_READ_WRITE_TOKEN manquant sur Vercel' },
+          { status: 500 }
+        );
+      }
+
+      const blob = await put(`cottages/${fileName}`, bytes, {
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+        contentType: file.type || undefined,
+      });
+
+      return NextResponse.json({ url: blob.url });
+    }
 
     const relativeDir = path.join('uploads', 'cottages');
     const absoluteDir = path.join(process.cwd(), 'public', relativeDir);
