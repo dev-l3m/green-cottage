@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Users } from 'lucide-react';
+import { Star, Users } from 'lucide-react';
+import { getCottageOfferMeta } from '@/lib/cottage-offers';
 
 export type FeaturedCottage = {
   id: string | number;
@@ -17,24 +18,21 @@ export type FeaturedCottage = {
 
 interface FeaturedCottagesGridProps {
   cottages: FeaturedCottage[];
-  pricePerNight: number;
 }
 
 export function FeaturedCottagesGrid({
   cottages,
-  pricePerNight,
 }: FeaturedCottagesGridProps) {
-  const featured = cottages.slice(0, 4);
+  const featured = cottages.slice(0, 6);
 
   if (featured.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
       {featured.map((cottage) => (
         <FeaturedCottageCard
           key={cottage.id}
           cottage={cottage}
-          pricePerNight={pricePerNight}
         />
       ))}
     </div>
@@ -43,16 +41,12 @@ export function FeaturedCottagesGrid({
 
 function FeaturedCottageCard({
   cottage,
-  pricePerNight,
 }: {
   cottage: FeaturedCottage;
-  pricePerNight: number;
 }) {
   const capacity =
     cottage.facts?.capacite_max ?? cottage.facts?.capacity ?? null;
-  const tags = (cottage.badges ?? []).slice(0, 3);
-  const description =
-    cottage.summary ?? cottage.description ?? '';
+  const offerMeta = getCottageOfferMeta(cottage.slug);
   const imageSrc =
     cottage.images?.hero ??
     cottage.images?.gallery?.[0] ??
@@ -60,70 +54,62 @@ function FeaturedCottageCard({
 
   return (
     <article
-      className="group flex flex-col rounded-2xl border border-border bg-white shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-gc-green focus-within:ring-offset-2"
+      className="group flex flex-col rounded-xl border border-border bg-white shadow-sm hover:shadow-md overflow-hidden focus-within:ring-2 focus-within:ring-gc-green focus-within:ring-offset-2"
       aria-labelledby={`cottage-title-${cottage.slug}`}
     >
       <Link
         href={`/cottages/${cottage.slug}`}
         className="flex flex-col flex-1 focus:outline-none focus-visible:ring-0"
       >
-        <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-muted">
+        <div className="relative h-44 overflow-hidden bg-muted">
           <Image
             src={imageSrc}
             alt={cottage.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
           />
           <span
-            className="absolute top-3 right-3 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm"
-            aria-label={`Prix: ${pricePerNight} euros par nuit`}
+            className="absolute top-3 left-3 rounded-md bg-gc-green px-2.5 py-1 text-xs font-semibold text-white shadow-sm"
+            aria-label={`Note ${offerMeta.score.toFixed(1)} sur 10`}
           >
-            {pricePerNight}€/nuit
+            {offerMeta.score.toFixed(1)}/10
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col p-5 md:p-6">
+        <div className="flex flex-1 flex-col p-4">
           <h3
             id={`cottage-title-${cottage.slug}`}
-            className="font-heading text-xl font-bold mb-2"
+            className="font-heading text-lg font-bold"
           >
             {cottage.name}
           </h3>
 
-          {description && (
-            <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
-              {description}
-            </p>
-          )}
+          <div className="mt-2 flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star
+                key={index}
+                className={
+                  index < offerMeta.comfortStars
+                    ? 'h-4 w-4 fill-gc-mustard text-gc-mustard'
+                    : 'h-4 w-4 text-muted-foreground/30'
+                }
+                aria-hidden
+              />
+            ))}
+          </div>
 
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center text-xs px-3 py-1.5 bg-secondary/10 text-secondary font-medium rounded-full border border-secondary/20"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Users
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+            {capacity != null ? `Jusqu'à ${capacity} voyageurs` : 'Capacité à confirmer'}
+          </div>
 
-          <div className="mt-auto flex items-center justify-between gap-4 pt-2">
-            {capacity != null ? (
-              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Users
-                  className="h-4 w-4 shrink-0 text-muted-foreground"
-                  aria-hidden
-                />
-                Jusqu&apos;à {capacity} personnes
-              </span>
-            ) : (
-              <span aria-hidden />
-            )}
-            <span className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
-              Voir
+          <div className="mt-auto pt-4">
+            <span className="inline-flex items-center justify-center rounded-md bg-gc-green px-3 py-2 text-sm font-semibold text-white transition-colors group-hover:bg-gc-green/90">
+              Découvrir
             </span>
           </div>
         </div>

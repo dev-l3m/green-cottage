@@ -58,7 +58,7 @@ const navigation = {
         { name: 'Préparation au départ', href: '/preparation-au-depart' },
       ],
     },
-    { name: 'Tarifs', href: '/tarifs' },
+    { name: 'Nos offres', href: '/cottages' },
     { name: 'Blog', href: '/blog' },
   ],
 };
@@ -203,7 +203,7 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className={`text-sm font-medium hover:text-gc-green transition-colors ${
+                      className={`text-sm font-medium transition-colors hover:bg-gc-green hover:text-white ${
                         dropdownItems.some((d) => isActive(d.href))
                           ? 'text-gc-green'
                           : 'text-foreground'
@@ -242,7 +242,7 @@ export function Header() {
                 className={`text-sm font-medium transition-colors px-3 py-2 rounded-md ${
                   isActive(item.href)
                     ? 'text-gc-green bg-gc-green/10'
-                    : 'text-foreground hover:text-gc-green hover:bg-muted'
+                    : 'text-foreground hover:text-white hover:bg-gc-green'
                 }`}
               >
                 {item.name}
@@ -261,7 +261,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-900 hover:text-gc-green"
+                  className="text-gray-900 hover:bg-gc-green hover:text-white"
                 >
                   Mon compte
                 </Button>
@@ -276,7 +276,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-900 hover:text-gc-green"
+                className="text-gray-900 hover:bg-gc-green hover:text-white"
                 onClick={() => signOut()}
               >
                 Déconnexion

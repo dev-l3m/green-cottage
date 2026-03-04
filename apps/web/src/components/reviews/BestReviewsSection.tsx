@@ -43,9 +43,6 @@ export function BestReviewsSection({
           </h2>
           <div className="green-divider w-32 mb-12 mx-auto" />
           <div className="w-full h-1 bg-gc-green/40 my-6" />
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Découvrez les avis authentiques de nos clients qui ont vécu l&apos;expérience Green Cottage
-          </p>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((review) => (
@@ -62,8 +59,8 @@ export function BestReviewsSection({
                 <p className="text-muted-foreground mb-4 flex-1 line-clamp-4">
                   &quot;{review.comment.fr}&quot;
                 </p>
-                <div className="green-divider w-40 mt-3 mb-12 mx-auto" />
-                <div className="mt-auto pt-4">
+                <div className="green-divider w-40 mt-3 mb-4 mx-auto" />
+                <div className="mt-auto pt-2">
                   <p className="text-sm font-semibold">— {review.author}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {formatDate(review.createdAt)}

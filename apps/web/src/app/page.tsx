@@ -8,6 +8,7 @@ import { Hero } from '@/components/home/Hero';
 import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
 import { AboutSection } from '@/components/home/AboutSection';
 import { BestReviewsSection } from '@/components/reviews/BestReviewsSection';
+import { EcoBookletPopup } from '@/components/home/EcoBookletPopup';
 import { mapPublicCottagesToHomeFeatured } from '@/lib/cottages-shared';
 import { getPublicCottages } from '@/lib/server/public-cottages';
 import { getBestPublicReviews } from '@/lib/server/public-reviews';
@@ -34,6 +35,7 @@ export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
+      <EcoBookletPopup />
       <main className="flex-1">
         {/* Hero Section */}
         <Hero />
@@ -50,7 +52,7 @@ export default async function HomePage() {
                 Chaque hébergement Green Cottage est une invitation au ressourcement. Découvrez des lieux authentiques au cœur de la nature.
               </p>
             </header>
-            <FeaturedCottagesGrid cottages={cottages} pricePerNight={100} />
+            <FeaturedCottagesGrid cottages={cottages} />
             <div className="text-center mt-10">
               <Link href="/cottages">
                 <Button variant="outline" className="focus-visible:ring-2 focus-visible:ring-gc-green focus-visible:ring-offset-2">

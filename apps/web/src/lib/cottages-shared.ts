@@ -1,4 +1,8 @@
 import type { CottageListItem } from '@/lib/cottages';
+import {
+  resolveCottageHeroImage,
+  validateCottageImageMapping,
+} from '@/lib/cottage-offers';
 
 export type PublicCottageDto = {
   id: string;
@@ -28,13 +32,20 @@ export type CottageOption = { slug: string; name: string };
 export function mapPublicCottagesToListItems(
   cottages: PublicCottageDto[]
 ): CottageListItem[] {
+  validateCottageImageMapping(
+    cottages.map((cottage) => ({
+      slug: cottage.slug,
+      images: cottage.images ?? [],
+    }))
+  );
+
   return cottages.map((cottage) => ({
     id: cottage.id,
     slug: cottage.slug,
     title: cottage.title,
     summary: cottage.summary,
     basePrice: cottage.basePrice,
-    image: cottage.images[0] ?? '',
+    image: resolveCottageHeroImage(cottage.slug, cottage.images ?? []),
     capacity: cottage.capacity,
   }));
 }
@@ -42,6 +53,13 @@ export function mapPublicCottagesToListItems(
 export function mapPublicCottagesToHomeFeatured(
   cottages: PublicCottageDto[]
 ): HomeFeaturedCottage[] {
+  validateCottageImageMapping(
+    cottages.map((cottage) => ({
+      slug: cottage.slug,
+      images: cottage.images ?? [],
+    }))
+  );
+
   return cottages.map((cottage) => ({
     id: cottage.id,
     slug: cottage.slug,
@@ -50,7 +68,7 @@ export function mapPublicCottagesToHomeFeatured(
     description: cottage.description ?? undefined,
     facts: { capacite_max: cottage.capacity },
     images: {
-      hero: cottage.images[0] ?? '',
+      hero: resolveCottageHeroImage(cottage.slug, cottage.images ?? []),
       gallery: cottage.images.slice(1),
     },
     badges: [],

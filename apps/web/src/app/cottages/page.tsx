@@ -24,14 +24,6 @@ const LISTING_TITLES: Record<string, string> = {
   bruyere: 'Les Bruyères',
   puma: 'Le Puma',
 };
-const LISTING_SUMMARIES: Record<string, string> = {
-  'petit-pierre':
-    'Un cocon intime, cuisine équipée, salon chaleureux et accès direct au jardin.',
-  bruyere:
-    'Deux chambres, grande terrasse, vue sur les prairies et confort moderne.',
-  puma:
-    'Ambiance boisée, salon cosy, cuisine ouverte, idéal pour se détendre.',
-};
 
 function sortCottages(cottages: CottageListItem[]): CottageListItem[] {
   const bySlug = new Map(cottages.map((c) => [c.slug, c]));
@@ -97,17 +89,13 @@ export default async function CottagesPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {cottages.map((cottage, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                {cottages.map((cottage) => (
                   <CottageCard
                     key={cottage.id}
-                    id={cottage.id}
                     slug={cottage.slug}
                     title={LISTING_TITLES[cottage.slug] ?? cottage.title}
-                    summary={LISTING_SUMMARIES[cottage.slug] ?? cottage.summary ?? undefined}
-                    price={cottage.basePrice}
                     image={cottage.image}
-                    imageIndex={index}
                     capacity={cottage.capacity}
                   />
                 ))}
