@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublicCottages } from '@/lib/server/public-cottages';
+import { mapPublicCottagesToListItems } from '@/lib/cottages-shared';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,12 @@ export async function GET(request: NextRequest) {
       amenities: amenities && amenities.length > 0 ? amenities : undefined,
     });
 
-    return NextResponse.json(cottages);
+    return NextResponse.json(
+      cottages.map((cottage) => ({
+        ...cottage,
+        image: mapPublicCottagesToListItems([cottage])[0]?.image ?? '',
+      }))
+    );
   } catch (error) {
     console.error('Error fetching cottages:', error);
     return NextResponse.json({ error: 'Failed to fetch cottages' }, { status: 500 });

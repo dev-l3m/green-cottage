@@ -6,8 +6,7 @@ import { LocationMap } from '@/components/cottages/LocationMap';
 import { BookingCard } from '@/components/cottages/BookingCard';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { getCottageBySlug } from '@/lib/cottages';
-import { getReviewsBySlug } from '@/lib/reviews';
-import { prisma } from '@/lib/prisma';
+import { getPublicReviewsForSlug } from '@/lib/server/public-reviews';
 import Image from 'next/image';
 import { Users, Home } from 'lucide-react';
 import type { DisplayReview } from '@/components/reviews/ReviewList';
@@ -21,34 +20,7 @@ export default async function CottageDetailPage({ params }: { params: { slug: st
     notFound();
   }
 
-  // Avis: source = reviews.json (toujours affichés) + BDD si dispo (PublicReview)
-  const jsonReviews: DisplayReview[] = getReviewsBySlug(params.slug).map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    author: r.author,
-    comment: r.comment,
-    createdAt: r.createdAt,
-  }));
-
-  let dbReviews: DisplayReview[] = [];
-  try {
-    const rows = await prisma.publicReview.findMany({
-      where: { slug: params.slug, status: 'PUBLISHED' },
-      orderBy: { createdAt: 'desc' },
-    });
-    dbReviews = rows.map((r) => ({
-      id: r.id,
-      rating: r.rating,
-      author: r.author ?? 'Anonyme',
-      comment: r.comment,
-      createdAt: r.createdAt.toISOString(),
-    }));
-  } catch {
-    // Table absente ou BDD injoignable : on affiche uniquement le JSON
-    dbReviews = [];
-  }
-
-  const allReviews: DisplayReview[] = [...jsonReviews, ...dbReviews].sort(
+  const allReviews: DisplayReview[] = (await getPublicReviewsForSlug(params.slug)).sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   const count = allReviews.length;

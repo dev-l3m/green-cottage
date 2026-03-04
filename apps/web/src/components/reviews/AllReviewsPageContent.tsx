@@ -4,10 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { StarRating } from './StarRating';
 import Link from 'next/link';
-import type { ReviewWithSlug } from '@/lib/reviews';
+import type { PublicReviewWithSlug } from '@/lib/server/public-reviews';
 
 interface AllReviewsPageContentProps {
-  reviews: ReviewWithSlug[];
+  reviews: PublicReviewWithSlug[];
   slugToName: Record<string, string>;
   filterOptions: { slug: string; name: string }[];
 }

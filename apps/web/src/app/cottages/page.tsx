@@ -2,6 +2,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CottageCard } from '@/components/cottages/CottageCard';
 import type { CottageListItem } from '@/lib/cottages';
+import { mapPublicCottagesToListItems } from '@/lib/cottages-shared';
 import Image from 'next/image';
 import { siteImages } from '@/lib/assets/images';
 import { Leaf } from 'lucide-react';
@@ -48,16 +49,7 @@ function sortCottages(cottages: CottageListItem[]): CottageListItem[] {
 async function getDynamicCottagesForListing(): Promise<CottageListItem[]> {
   try {
     const cottages = await getPublicCottages({ isActive: true });
-
-    return cottages.map((cottage) => ({
-      id: cottage.id,
-      slug: cottage.slug,
-      title: cottage.title,
-      summary: cottage.summary,
-      basePrice: cottage.basePrice,
-      image: cottage.images[0] ?? '',
-      capacity: cottage.capacity,
-    }));
+    return mapPublicCottagesToListItems(cottages);
   } catch {
     return [];
   }

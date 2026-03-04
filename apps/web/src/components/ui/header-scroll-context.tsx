@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { mapPublicCottagesToOptions } from '@/lib/cottages-shared';
 
 export type CottageOption = { slug: string; name: string };
 
@@ -77,9 +78,7 @@ export function HeaderScrollProvider({ children }: { children: ReactNode }) {
         const res = await fetch('/api/cottages?isActive=true');
         if (!res.ok) return;
         const data = (await res.json()) as Array<{ slug: string; title: string }>;
-        const mapped = data
-          .filter((c) => Boolean(c.slug) && Boolean(c.title))
-          .map((c) => ({ slug: c.slug, name: c.title }));
+        const mapped = mapPublicCottagesToOptions(data);
         if (isMounted && mapped.length > 0) {
           setCottages(sortCottagesByName(mapped));
         }

@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/reviews/StarRating';
-import type { ReviewWithSlug } from '@/lib/reviews';
+import type { PublicReviewWithSlug } from '@/lib/server/public-reviews';
 
 interface BestReviewsSectionProps {
-  reviews: ReviewWithSlug[];
+  reviews: PublicReviewWithSlug[];
   slugToName: Record<string, string>;
   id?: string;
 }

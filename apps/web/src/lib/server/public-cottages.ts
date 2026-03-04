@@ -1,16 +1,5 @@
 import { prisma } from '@/lib/prisma';
-
-export type PublicCottage = {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string | null;
-  description: string;
-  basePrice: number;
-  capacity: number;
-  images: string[];
-  isActive: boolean;
-};
+import type { PublicCottageDto } from '@/lib/cottages-shared';
 
 export type PublicCottagesFilters = {
   isActive?: boolean;
@@ -22,7 +11,7 @@ export type PublicCottagesFilters = {
 
 export async function getPublicCottages(
   filters: PublicCottagesFilters = {}
-): Promise<PublicCottage[]> {
+): Promise<PublicCottageDto[]> {
   const where: {
     isActive?: boolean;
     capacity?: { gte: number };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { getPublicReviewsForSlug } from '@/lib/server/public-reviews';
 
 const postSchema = z.object({
   slug: z.string().min(1, 'Slug requis'),
@@ -41,26 +42,17 @@ export async function GET(request: NextRequest) {
     if (!slug) {
       return NextResponse.json({ error: 'slug required' }, { status: 400 });
     }
-    const cottage = await prisma.cottage.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-    if (!cottage) {
-      return NextResponse.json({ error: 'Cottage not found' }, { status: 404 });
+    const reviews = await getPublicReviewsForSlug(slug);
+    if (reviews.length === 0) {
+      const cottage = await prisma.cottage.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+      if (!cottage) {
+        return NextResponse.json({ error: 'Cottage not found' }, { status: 404 });
+      }
     }
-    const reviews = await prisma.publicReview.findMany({
-      where: { cottageId: cottage.id, status: 'PUBLISHED' },
-      orderBy: { createdAt: 'desc' },
-    });
-    return NextResponse.json(
-      reviews.map((r) => ({
-        id: r.id,
-        rating: r.rating,
-        author: r.author ?? 'Anonyme',
-        comment: r.comment,
-        createdAt: r.createdAt.toISOString(),
-      }))
-    );
+    return NextResponse.json(reviews);
   } catch (error) {
     console.error('Error fetching reviews:', error);
     return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });

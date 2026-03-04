@@ -8,39 +8,16 @@ import { Hero } from '@/components/home/Hero';
 import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
 import { AboutSection } from '@/components/home/AboutSection';
 import { BestReviewsSection } from '@/components/reviews/BestReviewsSection';
-import { getBestRatedReviews } from '@/lib/reviews';
+import { mapPublicCottagesToHomeFeatured } from '@/lib/cottages-shared';
 import { getPublicCottages } from '@/lib/server/public-cottages';
-
-type CottageFromJSON = {
-  id: string;
-  slug: string;
-  name: string;
-  summary?: string;
-  description?: string;
-  facts?: { capacite_max?: number; capacity?: number };
-  images: { hero: string; gallery?: string[] };
-  badges?: string[];
-};
+import { getBestPublicReviews } from '@/lib/server/public-reviews';
 
 export const dynamic = 'force-dynamic';
 
-async function getHomeCottages(): Promise<CottageFromJSON[]> {
+async function getHomeCottages() {
   try {
     const cottages = await getPublicCottages({ isActive: true });
-
-    return cottages.map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.title,
-      summary: c.summary ?? undefined,
-      description: c.description ?? undefined,
-      facts: { capacite_max: c.capacity },
-      images: {
-        hero: c.images[0] ?? '',
-        gallery: c.images.slice(1),
-      },
-      badges: [],
-    }));
+    return mapPublicCottagesToHomeFeatured(cottages);
   } catch {
     return [];
   }
@@ -48,7 +25,7 @@ async function getHomeCottages(): Promise<CottageFromJSON[]> {
 
 export default async function HomePage() {
   const cottages = await getHomeCottages();
-  const bestReviews = getBestRatedReviews(6);
+  const bestReviews = await getBestPublicReviews(6);
   const slugToName = cottages.reduce(
     (acc, c) => ({ ...acc, [c.slug]: c.name }),
     {} as Record<string, string>

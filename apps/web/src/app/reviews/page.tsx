@@ -2,24 +2,22 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Suspense } from 'react';
 import {
-  getAllReviewsWithSlug,
-  getSlugsWithReviews,
-} from '@/lib/reviews';
+  getAllPublicReviewsWithSlug,
+  getReviewFilterOptions,
+} from '@/lib/server/public-reviews';
 import { AllReviewsPageContent } from '@/components/reviews/AllReviewsPageContent';
-import cottagesData from '@/content/cottages.json';
 
-type CottageFromJSON = { slug: string; name: string };
+export const dynamic = 'force-dynamic';
 
-export default function ReviewsPage({
+export default async function ReviewsPage({
   searchParams,
 }: {
   searchParams: { gite?: string };
 }) {
   const giteSlug = searchParams?.gite;
-  const allReviews = getAllReviewsWithSlug();
-  const slugsWithReviews = getSlugsWithReviews();
-  const allCottages = cottagesData as CottageFromJSON[];
-  const slugToName = allCottages.reduce(
+  const allReviews = await getAllPublicReviewsWithSlug();
+  const filterOptions = await getReviewFilterOptions();
+  const slugToName = filterOptions.reduce(
     (acc, c) => ({ ...acc, [c.slug]: c.name }),
     {} as Record<string, string>
   );
@@ -27,10 +25,6 @@ export default function ReviewsPage({
   const filteredReviews = giteSlug
     ? allReviews.filter((r) => r.slug === giteSlug)
     : allReviews;
-
-  const filterOptions = slugsWithReviews
-    .map((slug) => ({ slug, name: slugToName[slug] ?? slug }))
-    .filter((o) => o.name);
 
   return (
     <div className="flex min-h-screen flex-col">
