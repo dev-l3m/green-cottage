@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import cottagesData from '@/content/cottages.json';
 
 export type CottageOption = { slug: string; name: string };
 
@@ -20,11 +19,10 @@ export type SearchState = {
   children: number;
 };
 
-const COTTAGES_OPTIONS: CottageOption[] = (
-  cottagesData as { slug: string; name: string }[]
-).map((c) => ({ slug: c.slug, name: c.name }));
-
-const ALL_COTTAGES_OPTIONS: CottageOption[] = COTTAGES_OPTIONS;
+const sortCottagesByName = (list: CottageOption[]) =>
+  [...list].sort((a, b) =>
+    a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+  );
 
 type HeaderScrollContextValue = {
   isHeaderScrolled: boolean;
@@ -52,6 +50,7 @@ export function HeaderScrollProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
   const [searchState, setSearchState] = useState<SearchState>(defaultSearchState);
+  const [cottages, setCottages] = useState<CottageOption[]>([]);
 
   const updateScrollState = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -69,6 +68,32 @@ export function HeaderScrollProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('hashchange', updateScrollState);
     };
   }, [updateScrollState]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCottages = async () => {
+      try {
+        const res = await fetch('/api/cottages?isActive=true');
+        if (!res.ok) return;
+        const data = (await res.json()) as Array<{ slug: string; title: string }>;
+        const mapped = data
+          .filter((c) => Boolean(c.slug) && Boolean(c.title))
+          .map((c) => ({ slug: c.slug, name: c.title }));
+        if (isMounted && mapped.length > 0) {
+          setCottages(sortCottagesByName(mapped));
+        }
+      } catch {
+        // Keep empty list if API is unavailable.
+      }
+    };
+
+    fetchCottages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const updateDestination = useCallback((dest: CottageOption | null) => {
     setSearchState((s) => ({ ...s, destination: dest }));
@@ -106,7 +131,7 @@ export function HeaderScrollProvider({ children }: { children: ReactNode }) {
     updateRange,
     updateTravelers,
     submitSearch,
-    cottages: ALL_COTTAGES_OPTIONS,
+    cottages,
   };
 
   return (

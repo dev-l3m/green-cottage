@@ -9,7 +9,7 @@ import { FeaturedCottagesGrid } from '@/components/home/FeaturedCottagesGrid';
 import { AboutSection } from '@/components/home/AboutSection';
 import { BestReviewsSection } from '@/components/reviews/BestReviewsSection';
 import { getBestRatedReviews } from '@/lib/reviews';
-import { prisma } from '@/lib/prisma';
+import { getPublicCottages } from '@/lib/server/public-cottages';
 
 type CottageFromJSON = {
   id: string;
@@ -26,19 +26,7 @@ export const dynamic = 'force-dynamic';
 
 async function getHomeCottages(): Promise<CottageFromJSON[]> {
   try {
-    const cottages = await prisma.cottage.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        summary: true,
-        description: true,
-        capacity: true,
-        images: true,
-      },
-    });
+    const cottages = await getPublicCottages({ isActive: true });
 
     return cottages.map((c) => ({
       id: c.id,

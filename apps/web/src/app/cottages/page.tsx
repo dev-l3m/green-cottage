@@ -1,13 +1,12 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CottageCard } from '@/components/cottages/CottageCard';
-import { getCottagesForListing } from '@/lib/cottages';
 import type { CottageListItem } from '@/lib/cottages';
 import Image from 'next/image';
 import { siteImages } from '@/lib/assets/images';
 import { Leaf } from 'lucide-react';
 import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
+import { getPublicCottages } from '@/lib/server/public-cottages';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,19 +47,7 @@ function sortCottages(cottages: CottageListItem[]): CottageListItem[] {
 
 async function getDynamicCottagesForListing(): Promise<CottageListItem[]> {
   try {
-    const cottages = await prisma.cottage.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        summary: true,
-        basePrice: true,
-        capacity: true,
-        images: true,
-      },
-    });
+    const cottages = await getPublicCottages({ isActive: true });
 
     return cottages.map((cottage) => ({
       id: cottage.id,
@@ -72,7 +59,7 @@ async function getDynamicCottagesForListing(): Promise<CottageListItem[]> {
       capacity: cottage.capacity,
     }));
   } catch {
-    return getCottagesForListing();
+    return [];
   }
 }
 

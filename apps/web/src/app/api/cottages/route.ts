@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getPublicCottages } from '@/lib/server/public-cottages';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,31 +12,12 @@ export async function GET(request: NextRequest) {
     const amenities = searchParams.get('amenities')?.split(',');
     const isActive = searchParams.get('isActive') !== 'false';
 
-    const where: any = {
+    const cottages = await getPublicCottages({
       isActive,
-    };
-
-    if (capacity) {
-      where.capacity = { gte: parseInt(capacity) };
-    }
-
-    if (minPrice || maxPrice) {
-      where.basePrice = {};
-      if (minPrice) where.basePrice.gte = parseFloat(minPrice);
-      if (maxPrice) where.basePrice.lte = parseFloat(maxPrice);
-    }
-
-    if (amenities && amenities.length > 0) {
-      where.amenities = {
-        hasEvery: amenities,
-      };
-    }
-
-    const cottages = await prisma.cottage.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      capacity: capacity ? parseInt(capacity, 10) : undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      amenities: amenities && amenities.length > 0 ? amenities : undefined,
     });
 
     return NextResponse.json(cottages);

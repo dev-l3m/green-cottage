@@ -63,13 +63,21 @@ const navigation = {
   ],
 };
 
+const sortByNameAsc = <T extends { name: string }>(items: T[]) =>
+  [...items].sort((a, b) =>
+    a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
+  );
+
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { isHeaderScrolled } = useHeaderUi();
+  const { isHeaderScrolled, cottages } = useHeaderUi();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdowns, setMobileDropdowns] = useState<Record<string, boolean>>({});
   const [landingHash, setLandingHash] = useState('');
+  const cottagesDropdown = sortByNameAsc(
+    cottages.map((c) => ({ name: c.name, href: `/cottages/${c.slug}` }))
+  );
 
   const handleLandingNavClick = useCallback((e: React.MouseEvent, id: string, hash: string) => {
     e.preventDefault();
@@ -187,14 +195,16 @@ export function Header() {
             })
           ) : (
             navigation.main.map((item) => {
-            if (item.dropdown) {
+            const dropdownItems =
+              item.name === 'Gîtes' ? cottagesDropdown : item.dropdown;
+            if (dropdownItems) {
               return (
                 <DropdownMenu key={item.name}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       className={`text-sm font-medium hover:text-gc-green transition-colors ${
-                        item.dropdown.some((d) => isActive(d.href))
+                        dropdownItems.some((d) => isActive(d.href))
                           ? 'text-gc-green'
                           : 'text-foreground'
                       }`}
@@ -207,7 +217,7 @@ export function Header() {
                     align="start"
                     className="w-56 bg-background rounded-lg shadow-lg border mt-2"
                   >
-                    {item.dropdown.map((dropdownItem) => (
+                    {dropdownItems.map((dropdownItem) => (
                       <DropdownMenuItem key={dropdownItem.name} asChild>
                         <Link
                           href={dropdownItem.href}
@@ -316,7 +326,9 @@ export function Header() {
               })
             ) : (
               navigation.main.map((item) => {
-              if (item.dropdown) {
+              const dropdownItems =
+                item.name === 'Gîtes' ? cottagesDropdown : item.dropdown;
+              if (dropdownItems) {
                 const isOpen = mobileDropdowns[item.name];
                 return (
                   <div key={item.name}>
@@ -331,7 +343,7 @@ export function Header() {
                     </button>
                     {isOpen && (
                       <div className="pl-4 space-y-1 mt-1">
-                        {item.dropdown.map((dropdownItem) => (
+                        {dropdownItems.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.name}
                             href={dropdownItem.href}
