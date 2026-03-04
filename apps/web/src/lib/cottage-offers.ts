@@ -3,7 +3,7 @@ type CottageImageInput = {
   images: string[];
 };
 
-type CottageOfferMeta = {
+export type CottageOfferMeta = {
   score: number;
   comfortStars: 1 | 2 | 3 | 4 | 5;
 };
@@ -31,13 +31,35 @@ const HERO_IMAGE_BY_SLUG: Record<string, string> = {
     'https://green-cottage.moryjinabovictorbrillant.com/assets/img/uploads/gites/1-69736c39efab2.png',
 };
 
-export function getCottageOfferMeta(slug: string): CottageOfferMeta {
-  return OFFER_META_BY_SLUG[slug] ?? DEFAULT_OFFER_META;
+export function resolveCottageOfferMeta(
+  slug: string,
+  ratingScore?: number | null,
+  comfortStars?: number | null
+): CottageOfferMeta {
+  const fallback = OFFER_META_BY_SLUG[slug] ?? DEFAULT_OFFER_META;
+  const normalizedScore =
+    typeof ratingScore === 'number' && Number.isFinite(ratingScore)
+      ? Math.min(10, Math.max(0, ratingScore))
+      : fallback.score;
+  const normalizedStars =
+    typeof comfortStars === 'number' && Number.isFinite(comfortStars)
+      ? (Math.min(5, Math.max(1, Math.round(comfortStars))) as CottageOfferMeta['comfortStars'])
+      : fallback.comfortStars;
+
+  return {
+    score: normalizedScore,
+    comfortStars: normalizedStars,
+  };
 }
 
-export function resolveCottageHeroImage(slug: string, images: string[]): string {
+export function resolveCottageHeroImage(
+  slug: string,
+  images: string[],
+  preferredImage?: string | null
+): string {
   const fallbackImage =
     'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800';
+  if (preferredImage?.trim()) return preferredImage.trim();
   const forcedImage = HERO_IMAGE_BY_SLUG[slug];
   if (forcedImage) return forcedImage;
   return images.find(Boolean) ?? fallbackImage;

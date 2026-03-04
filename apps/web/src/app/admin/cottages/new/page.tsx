@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 export default function AdminNewCottagePage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     slug: '',
@@ -16,20 +18,38 @@ export default function AdminNewCottagePage() {
     capacity: 4,
     basePrice: 100,
     cleaningFee: 0,
+    ratingScore: 8.5,
+    comfortStars: 4,
+    heroImage: '',
     imagesText: '',
     amenitiesText: '',
     isActive: true,
   });
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const payload = new FormData();
+    payload.append('file', file);
+    const response = await fetch('/api/admin/uploads/cottages', {
+      method: 'POST',
+      body: payload,
+    });
+    const data = (await response.json()) as { url?: string; error?: string };
+    if (!response.ok || !data.url) {
+      throw new Error(data.error ?? "Échec de l'upload");
+    }
+    return data.url;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
-    const images = form.imagesText
+    const galleryImages = form.imagesText
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
+    const images = [form.heroImage.trim(), ...galleryImages].filter(Boolean);
     const amenities = form.amenitiesText
       .split('\n')
       .map((s) => s.trim())
@@ -48,6 +68,9 @@ export default function AdminNewCottagePage() {
           basePrice: Number(form.basePrice),
           cleaningFee: Number(form.cleaningFee),
           images,
+          heroImage: form.heroImage.trim() || undefined,
+          ratingScore: Number(form.ratingScore),
+          comfortStars: Number(form.comfortStars),
           amenities,
           isActive: form.isActive,
         }),
@@ -64,6 +87,41 @@ export default function AdminNewCottagePage() {
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer plus tard.');
       setSaving(false);
+    }
+  };
+
+  const handleHeroUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingHero(true);
+      setError(null);
+      const url = await uploadImage(file);
+      setForm((s) => ({ ...s, heroImage: url }));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Erreur d'upload");
+    } finally {
+      setUploadingHero(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleGalleryUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingGallery(true);
+      setError(null);
+      const url = await uploadImage(file);
+      setForm((s) => ({
+        ...s,
+        imagesText: s.imagesText.trim() ? `${s.imagesText.trim()}\n${url}` : url,
+      }));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Erreur d'upload");
+    } finally {
+      setUploadingGallery(false);
+      event.target.value = '';
     }
   };
 
@@ -169,9 +227,71 @@ export default function AdminNewCottagePage() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="ratingScore" className="block text-sm font-medium mb-1">
+              Note /10
+            </label>
+            <input
+              id="ratingScore"
+              type="number"
+              min={0}
+              max={10}
+              step="0.1"
+              className="w-full rounded-md border px-3 py-2"
+              value={form.ratingScore}
+              onChange={(e) => setForm((s) => ({ ...s, ratingScore: Number(e.target.value) }))}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="comfortStars" className="block text-sm font-medium mb-1">
+              Étoiles de confort
+            </label>
+            <select
+              id="comfortStars"
+              className="w-full rounded-md border px-3 py-2"
+              value={form.comfortStars}
+              onChange={(e) => setForm((s) => ({ ...s, comfortStars: Number(e.target.value) }))}
+            >
+              {[1, 2, 3, 4, 5].map((star) => (
+                <option key={star} value={star}>
+                  {star} étoile{star > 1 ? 's' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="heroImage" className="block text-sm font-medium mb-1">
+            Image principale du gîte (URL)
+          </label>
+          <input
+            id="heroImage"
+            type="text"
+            className="w-full rounded-md border px-3 py-2"
+            value={form.heroImage}
+            onChange={(e) => setForm((s) => ({ ...s, heroImage: e.target.value }))}
+            placeholder="/uploads/... ou https://..."
+          />
+          <div className="mt-2">
+            <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleHeroUpload}
+                disabled={uploadingHero}
+              />
+              {uploadingHero ? 'Upload en cours...' : 'Uploader une image principale'}
+            </label>
+          </div>
+        </div>
+
         <div>
           <label htmlFor="imagesText" className="block text-sm font-medium mb-1">
-          Images (une URL par ligne, au moins une ligne requise)
+          Images secondaires (une URL par ligne, au moins une ligne requise)
           </label>
           <textarea
             id="imagesText"
@@ -180,6 +300,18 @@ export default function AdminNewCottagePage() {
             onChange={(e) => setForm((s) => ({ ...s, imagesText: e.target.value }))}
             required
           />
+          <div className="mt-2">
+            <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleGalleryUpload}
+                disabled={uploadingGallery}
+              />
+              {uploadingGallery ? 'Upload en cours...' : 'Uploader une image secondaire'}
+            </label>
+          </div>
         </div>
 
         <div>

@@ -2,13 +2,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users } from 'lucide-react';
-import { getCottageOfferMeta, resolveCottageHeroImage } from '@/lib/cottage-offers';
+import { resolveCottageHeroImage, resolveCottageOfferMeta } from '@/lib/cottage-offers';
 
 interface CottageCardProps {
   slug: string;
   title: string;
   image?: string | null;
   capacity?: number;
+  ratingScore?: number | null;
+  comfortStars?: number | null;
 }
 
 export function CottageCard({
@@ -16,9 +18,11 @@ export function CottageCard({
   title,
   image,
   capacity,
+  ratingScore,
+  comfortStars,
 }: CottageCardProps) {
-  const imageSrc = resolveCottageHeroImage(slug, image ? [image] : []);
-  const offerMeta = getCottageOfferMeta(slug);
+  const imageSrc = resolveCottageHeroImage(slug, image ? [image] : [], image);
+  const offerMeta = resolveCottageOfferMeta(slug, ratingScore, comfortStars);
 
   return (
     <Card className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-all duration-300 group">

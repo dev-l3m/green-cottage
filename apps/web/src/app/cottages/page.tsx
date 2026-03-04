@@ -97,6 +97,8 @@ export default async function CottagesPage() {
                     title={LISTING_TITLES[cottage.slug] ?? cottage.title}
                     image={cottage.image}
                     capacity={cottage.capacity}
+                    ratingScore={cottage.ratingScore}
+                    comfortStars={cottage.comfortStars}
                   />
                 ))}
                 {/* Studios de jardin écologiques (à venir) */}

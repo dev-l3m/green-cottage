@@ -3,6 +3,13 @@ import { requireAdmin } from '@/lib/middleware';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
+const imageUrlSchema = z
+  .string()
+  .trim()
+  .refine((value) => value.startsWith('/') || /^https?:\/\//i.test(value), {
+    message: 'URL image invalide',
+  });
+
 const cottageSchema = z.object({
   slug: z.string().min(1),
   title: z.string().min(1),
@@ -20,6 +27,9 @@ const cottageSchema = z.object({
   checkInTime: z.string().optional(),
   checkOutTime: z.string().optional(),
   isActive: z.boolean().optional(),
+  ratingScore: z.number().min(0).max(10).optional(),
+  comfortStars: z.number().int().min(1).max(5).optional(),
+  heroImage: imageUrlSchema.optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -45,10 +55,36 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const data = cottageSchema.parse(body);
+    const { ratingScore, comfortStars, heroImage, ...cottageData } = data;
 
     const cottage = await prisma.cottage.create({
-      data,
+      data: cottageData,
     });
+
+    if (
+      ratingScore !== undefined ||
+      comfortStars !== undefined ||
+      heroImage !== undefined
+    ) {
+      await prisma.siteContent.upsert({
+        where: { key: `cottage_presentation:${cottage.id}` },
+        update: {
+          value: {
+            ratingScore,
+            comfortStars,
+            heroImage,
+          },
+        },
+        create: {
+          key: `cottage_presentation:${cottage.id}`,
+          value: {
+            ratingScore,
+            comfortStars,
+            heroImage,
+          },
+        },
+      });
+    }
 
     return NextResponse.json(cottage, { status: 201 });
   } catch (error) {

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Users } from 'lucide-react';
-import { getCottageOfferMeta } from '@/lib/cottage-offers';
+import { resolveCottageOfferMeta } from '@/lib/cottage-offers';
 
 export type FeaturedCottage = {
   id: string | number;
@@ -13,6 +13,8 @@ export type FeaturedCottage = {
   description?: string;
   facts?: { capacite_max?: number; capacity?: number };
   images: { hero: string; gallery?: string[] };
+  ratingScore?: number | null;
+  comfortStars?: number | null;
   badges?: string[];
 };
 
@@ -46,7 +48,11 @@ function FeaturedCottageCard({
 }) {
   const capacity =
     cottage.facts?.capacite_max ?? cottage.facts?.capacity ?? null;
-  const offerMeta = getCottageOfferMeta(cottage.slug);
+  const offerMeta = resolveCottageOfferMeta(
+    cottage.slug,
+    cottage.ratingScore,
+    cottage.comfortStars
+  );
   const imageSrc =
     cottage.images?.hero ??
     cottage.images?.gallery?.[0] ??

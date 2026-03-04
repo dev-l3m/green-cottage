@@ -13,6 +13,9 @@ export type PublicCottageDto = {
   basePrice: number;
   capacity: number;
   images: string[];
+  ratingScore?: number | null;
+  comfortStars?: number | null;
+  heroImage?: string | null;
   isActive: boolean;
 };
 
@@ -24,6 +27,8 @@ export type HomeFeaturedCottage = {
   description?: string;
   facts?: { capacite_max?: number; capacity?: number };
   images: { hero: string; gallery?: string[] };
+  ratingScore?: number | null;
+  comfortStars?: number | null;
   badges?: string[];
 };
 
@@ -45,8 +50,10 @@ export function mapPublicCottagesToListItems(
     title: cottage.title,
     summary: cottage.summary,
     basePrice: cottage.basePrice,
-    image: resolveCottageHeroImage(cottage.slug, cottage.images ?? []),
+    image: resolveCottageHeroImage(cottage.slug, cottage.images ?? [], cottage.heroImage),
     capacity: cottage.capacity,
+    ratingScore: cottage.ratingScore ?? null,
+    comfortStars: cottage.comfortStars ?? null,
   }));
 }
 
@@ -68,9 +75,11 @@ export function mapPublicCottagesToHomeFeatured(
     description: cottage.description ?? undefined,
     facts: { capacite_max: cottage.capacity },
     images: {
-      hero: resolveCottageHeroImage(cottage.slug, cottage.images ?? []),
+      hero: resolveCottageHeroImage(cottage.slug, cottage.images ?? [], cottage.heroImage),
       gallery: cottage.images.slice(1),
     },
+    ratingScore: cottage.ratingScore ?? null,
+    comfortStars: cottage.comfortStars ?? null,
     badges: [],
   }));
 }

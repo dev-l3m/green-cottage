@@ -55,6 +55,8 @@ export type CottageListItem = {
   basePrice: number;
   image: string;
   capacity: number;
+  ratingScore?: number | null;
+  comfortStars?: number | null;
 };
 
 /**

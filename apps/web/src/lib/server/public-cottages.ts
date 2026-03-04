@@ -50,5 +50,27 @@ export async function getPublicCottages(
     orderBy: { createdAt: 'desc' },
   });
 
-  return rows;
+  const presentationKeys = rows.map((row) => `cottage_presentation:${row.id}`);
+  const presentationRows = presentationKeys.length
+    ? await prisma.siteContent.findMany({
+        where: { key: { in: presentationKeys } },
+        select: { key: true, value: true },
+      })
+    : [];
+  const byKey = new Map(
+    presentationRows.map((row) => [
+      row.key,
+      row.value as { ratingScore?: number; comfortStars?: number; heroImage?: string },
+    ])
+  );
+
+  return rows.map((row) => {
+    const presentation = byKey.get(`cottage_presentation:${row.id}`);
+    return {
+      ...row,
+      ratingScore: presentation?.ratingScore ?? null,
+      comfortStars: presentation?.comfortStars ?? null,
+      heroImage: presentation?.heroImage ?? null,
+    };
+  });
 }
