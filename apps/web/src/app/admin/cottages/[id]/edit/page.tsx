@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type CottageEditData = {
   id: string;
@@ -28,6 +35,8 @@ export default function AdminEditCottagePage() {
   const [saving, setSaving] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [helpDialogType, setHelpDialogType] = useState<'hero' | 'gallery'>('hero');
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     slug: '',
@@ -42,6 +51,7 @@ export default function AdminEditCottagePage() {
     comfortStars: 4,
     isActive: true,
   });
+  const uploadTemporarilyDisabled = true;
 
   useEffect(() => {
     if (!cottageId) return;
@@ -316,19 +326,32 @@ export default function AdminEditCottagePage() {
             className="w-full rounded-md border px-3 py-2"
             value={form.heroImage}
             onChange={(e) => setForm((s) => ({ ...s, heroImage: e.target.value }))}
-            placeholder="/uploads/... ou https://..."
+            placeholder="https://..."
           />
           <div className="mt-2">
-            <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleHeroUpload}
-                disabled={uploadingHero}
-              />
-              {uploadingHero ? 'Upload en cours...' : 'Uploader une image principale'}
-            </label>
+            {uploadTemporarilyDisabled ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted"
+                onClick={() => {
+                  setHelpDialogType('hero');
+                  setHelpDialogOpen(true);
+                }}
+              >
+                Uploader une image principale
+              </button>
+            ) : (
+              <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleHeroUpload}
+                  disabled={uploadingHero}
+                />
+                {uploadingHero ? 'Upload en cours...' : 'Uploader une image principale'}
+              </label>
+            )}
           </div>
         </div>
 
@@ -343,16 +366,29 @@ export default function AdminEditCottagePage() {
             onChange={(e) => setForm((s) => ({ ...s, imagesText: e.target.value }))}
           />
           <div className="mt-2">
-            <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleGalleryUpload}
-                disabled={uploadingGallery}
-              />
-              {uploadingGallery ? 'Upload en cours...' : 'Uploader une image secondaire'}
-            </label>
+            {uploadTemporarilyDisabled ? (
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted"
+                onClick={() => {
+                  setHelpDialogType('gallery');
+                  setHelpDialogOpen(true);
+                }}
+              >
+                Uploader une image secondaire
+              </button>
+            ) : (
+              <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer hover:bg-muted">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleGalleryUpload}
+                  disabled={uploadingGallery}
+                />
+                {uploadingGallery ? 'Upload en cours...' : 'Uploader une image secondaire'}
+              </label>
+            )}
           </div>
         </div>
 
@@ -376,6 +412,28 @@ export default function AdminEditCottagePage() {
           </Button>
         </div>
       </form>
+
+      <Dialog open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Fonctionnement provisoire des images</DialogTitle>
+            <DialogDescription>
+              L&apos;upload direct est temporairement désactivé en production. Merci de copier-coller
+              l&apos;URL de l&apos;image dans le champ correspondant.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground space-y-2">
+            <p>
+              {helpDialogType === 'hero'
+                ? "Bouton cliqué : image principale du gîte."
+                : "Bouton cliqué : image secondaire du gîte."}
+            </p>
+            <p>
+              Exemple valide : <code>https://...</code>
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
