@@ -63,13 +63,19 @@ if (!env.DATABASE_URL && (env.PRISMA_DATABASE_URL || env.POSTGRES_URL)) {
   env.DATABASE_URL = env.PRISMA_DATABASE_URL || env.POSTGRES_URL;
 }
 
-// directUrl in schema.prisma uses DIRECT_DATABASE_URL.
-// Keep compatibility with older naming used in some environments.
-if (!env.DIRECT_DATABASE_URL && (env.DIRECT_URL || env.PRISMA_DIRECT_URL || env.POSTGRES_URL)) {
-  env.DIRECT_DATABASE_URL = env.DIRECT_URL || env.PRISMA_DIRECT_URL || env.POSTGRES_URL;
-}
-if (!env.DIRECT_DATABASE_URL && env.DATABASE_URL) {
-  env.DIRECT_DATABASE_URL = env.DATABASE_URL;
+// Keep compatibility for direct connection variable naming across environments.
+// Some schemas use one of: DIRECT_DATABASE_URL, DIRECT_URL, PRISMA_DATABASE_URL.
+const directValue =
+  env.DIRECT_DATABASE_URL ||
+  env.DIRECT_URL ||
+  env.PRISMA_DATABASE_URL ||
+  env.PRISMA_DIRECT_URL ||
+  env.POSTGRES_URL ||
+  env.DATABASE_URL;
+if (directValue) {
+  if (!env.DIRECT_DATABASE_URL) env.DIRECT_DATABASE_URL = directValue;
+  if (!env.DIRECT_URL) env.DIRECT_URL = directValue;
+  if (!env.PRISMA_DATABASE_URL) env.PRISMA_DATABASE_URL = directValue;
 }
 
 if (!env.DATABASE_URL) {
