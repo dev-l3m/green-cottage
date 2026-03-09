@@ -4,6 +4,8 @@ import path from 'node:path';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 const PDF_FILE_NAME = 'jeux-a-imprimer-green-cottage.pdf';
 
 function hashToken(token: string) {

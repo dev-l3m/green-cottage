@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 const DOWNLOAD_TOKEN_TTL_HOURS = Number(process.env.ECO_BOOKLET_DOWNLOAD_TOKEN_TTL_HOURS || '168');
 
 function hashToken(token: string) {

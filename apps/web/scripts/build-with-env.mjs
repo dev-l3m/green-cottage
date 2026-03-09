@@ -68,6 +68,9 @@ if (!env.DATABASE_URL && (env.PRISMA_DATABASE_URL || env.POSTGRES_URL)) {
 if (!env.DIRECT_DATABASE_URL && (env.DIRECT_URL || env.PRISMA_DIRECT_URL || env.POSTGRES_URL)) {
   env.DIRECT_DATABASE_URL = env.DIRECT_URL || env.PRISMA_DIRECT_URL || env.POSTGRES_URL;
 }
+if (!env.DIRECT_DATABASE_URL && env.DATABASE_URL) {
+  env.DIRECT_DATABASE_URL = env.DATABASE_URL;
+}
 
 if (!env.DATABASE_URL) {
   process.stderr.write('[build-with-env] ERROR: DATABASE_URL (ou PRISMA_DATABASE_URL / POSTGRES_URL) doit être défini.\n');
