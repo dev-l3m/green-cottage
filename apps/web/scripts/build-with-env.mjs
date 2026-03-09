@@ -40,8 +40,22 @@ for (const [k, v] of Object.entries(process.env)) {
   if (k.startsWith('npm_config_')) continue;
   env[k] = v;
 }
-for (const p of [join(root, '.env'), join(root, '.env.local')]) {
-  Object.assign(env, loadEnvFile(p));
+
+// IMPORTANT:
+// - In Vercel production/preview builds, NEVER override runtime env vars
+//   with local files. This avoids accidentally using local DB credentials.
+// - Locally/CI, we still allow .env/.env.local to fill missing values.
+if (env.VERCEL !== '1') {
+  for (const p of [join(root, '.env'), join(root, '.env.local')]) {
+    const fileEnv = loadEnvFile(p);
+    for (const [k, v] of Object.entries(fileEnv)) {
+      if (env[k] === undefined || env[k] === '') {
+        env[k] = v;
+      }
+    }
+  }
+} else {
+  process.stdout.write('[build-with-env] Vercel detected, skipping .env/.env.local override.\n');
 }
 
 // Prisma exige DATABASE_URL : accepter PRISMA_DATABASE_URL ou POSTGRES_URL comme fallback
