@@ -6,15 +6,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // DATABASE_URL : chargé depuis .env (local) ou variables d'environnement Vercel (déploiement).
-  // Pour tester en "production" sur Vercel avec les mêmes données que en local : définir
-  // dans Vercel (Settings → Environment Variables) la même valeur que dans .env.local
-  // (ex. URL Prisma Accelerate ou postgres direct). Le runtime accepte aussi PRISMA_DATABASE_URL
-  // via src/lib/prisma.ts si DATABASE_URL n'est pas défini.
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
