@@ -1,11 +1,11 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { siteImages } from '@/lib/assets/images';
 import aboutData from '@/content/about.json';
+import { InteractiveValueCards } from '@/components/about/InteractiveValueCards';
 
 type AboutData = typeof aboutData;
 
@@ -13,6 +13,29 @@ export const metadata = {
   title: 'Qui sommes-nous ? | Green Cottage',
   description: aboutData.hero.description,
 };
+
+const EXPERIENCE_IMAGES = [
+  { src: '/images/intercation/IMG_0056.JPG', alt: 'Espace interieur Green Cottage' },
+  { src: '/images/intercation/IMG_0057.JPG', alt: 'Ambiance gite Green Cottage' },
+  { src: '/images/intercation/IMG_0058.JPG', alt: 'Logement equipe Green Cottage' },
+  { src: '/images/intercation/IMG_0062.JPG', alt: 'Vue exterieure Green Cottage' },
+  { src: '/images/intercation/IMG_9972.JPG', alt: 'Environnement calme Green Cottage' },
+  { src: '/images/intercation/salle-de-jeu-2.jpeg', alt: 'Salle de jeu Green Cottage' },
+  { src: '/images/intercation/salle-de-jeu-3.jpeg', alt: 'Salle de jeu familiale Green Cottage' },
+];
+
+const LOCATION_IMAGES = [
+  { src: '/images/location/IMG_0040.JPG', alt: 'Paysage local autour de Sonnay' },
+  { src: '/images/location/IMG_0041.JPG', alt: 'Route d acces vers les gites' },
+  { src: '/images/location/IMG_0042.JPG', alt: 'Nature proche des gites' },
+  { src: '/images/location/IMG_0045.JPG', alt: 'Points d interet a proximite' },
+  { src: '/images/location/IMG_0046.JPG', alt: 'Cadre rural proche de Vienne en Isere' },
+  { src: '/images/location/IMG_0047.JPG', alt: 'Vue locale Sonnay et environs' },
+  { src: '/images/location/IMG_0049.JPG', alt: 'Balades autour de Green Cottage' },
+  { src: '/images/location/IMG_0055.JPG', alt: 'Activites a proximite des gites' },
+  { src: '/images/location/IMG_9967.JPG', alt: 'Ambiance campagne en Isere' },
+  { src: '/images/location/yoojo-6.JPG', alt: 'Loisirs proches des hebergements' },
+];
 
 export default function AboutPage() {
   const about = aboutData as AboutData;
@@ -65,23 +88,10 @@ export default function AboutPage() {
             <h2 className="font-heading text-2xl md:text-3xl font-semibold mb-8">
               {about.values.title}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {about.values.items.map((item, i) => (
-                <Card
-                  key={i}
-                  className="rounded-2xl shadow-sm border bg-card overflow-hidden"
-                >
-                  <CardContent className="p-6">
-                    <h3 className="font-heading text-lg font-semibold mb-3">
-                      {item.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {item.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <InteractiveValueCards
+              items={about.values.items}
+              frontImages={EXPERIENCE_IMAGES.slice(0, 3).map((image) => image.src)}
+            />
           </section>
 
           {/* Experience */}
@@ -94,6 +104,20 @@ export default function AboutPage() {
                 <p key={i}>{paragraph}</p>
               ))}
             </div>
+            <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {EXPERIENCE_IMAGES.map((image) => (
+                <div key={image.src} className="overflow-hidden rounded-xl border bg-white">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={640}
+                    height={420}
+                    className="h-44 w-full object-cover transition-transform duration-300 hover:scale-105"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Location */}
@@ -104,6 +128,20 @@ export default function AboutPage() {
             <div className="space-y-4 text-muted-foreground leading-relaxed max-w-3xl">
               {about.location.content.map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+            <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {LOCATION_IMAGES.map((image) => (
+                <div key={image.src} className="overflow-hidden rounded-xl border bg-white">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={520}
+                    height={360}
+                    className="h-36 w-full object-cover transition-transform duration-300 hover:scale-105"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                  />
+                </div>
               ))}
             </div>
           </section>

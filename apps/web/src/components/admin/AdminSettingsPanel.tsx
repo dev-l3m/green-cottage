@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 export type AdminSettingsValues = {
   homeHeroTitle: string;
   homeHeroDescription: string;
+  bookingManagementFeePercent: string;
+  touristTaxPercent: string;
   invoiceCompanyName: string;
   invoiceCompanyAddress: string;
   invoiceCompanyEmail: string;
@@ -71,6 +73,42 @@ export default function AdminSettingsPanel({
             onChange={(e) => setValues((s) => ({ ...s, homeHeroDescription: e.target.value }))}
             placeholder="Texte d&apos;accroche affiché sur l&apos;accueil"
           />
+        </div>
+      </section>
+
+      <section className="border rounded-lg p-4 space-y-4">
+        <h2 className="font-semibold text-lg">Tarification</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="bookingManagementFeePercent" className="block text-sm font-medium mb-1">
+              Frais de gestion (%)
+            </label>
+            <input
+              id="bookingManagementFeePercent"
+              type="number"
+              min={0}
+              step="0.1"
+              className="w-full rounded-md border px-3 py-2"
+              value={values.bookingManagementFeePercent}
+              onChange={(e) =>
+                setValues((s) => ({ ...s, bookingManagementFeePercent: e.target.value }))
+              }
+            />
+          </div>
+          <div>
+            <label htmlFor="touristTaxPercent" className="block text-sm font-medium mb-1">
+              Taxe de séjour (%)
+            </label>
+            <input
+              id="touristTaxPercent"
+              type="number"
+              min={0}
+              step="0.1"
+              className="w-full rounded-md border px-3 py-2"
+              value={values.touristTaxPercent}
+              onChange={(e) => setValues((s) => ({ ...s, touristTaxPercent: e.target.value }))}
+            />
+          </div>
         </div>
       </section>
 

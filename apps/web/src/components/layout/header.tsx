@@ -59,6 +59,7 @@ const navigation = {
       ],
     },
     { name: 'Nos offres', href: '/cottages' },
+    { name: 'Les Éco-Héros', href: '/eco-heros' },
     { name: 'Blog', href: '/blog' },
   ],
 };

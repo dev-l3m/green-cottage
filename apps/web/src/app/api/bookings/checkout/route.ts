@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getStripe } from '@/lib/stripe';
 import { checkAvailability, createTemporaryLock } from '@/lib/availability';
+import { computeBookingPricing } from '@/lib/pricing';
 import { z } from 'zod';
 
 const checkoutSchema = z.object({
@@ -41,15 +42,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cottage not found or inactive' }, { status: 404 });
     }
 
-    // Calculate pricing
-    const nights = Math.ceil(
-      (data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const baseAmount = cottage.basePrice * nights;
-    const cleaningFee = data.options?.cleaning && cottage.cleaningFee ? cottage.cleaningFee : 0;
-    const touristTaxRate = parseFloat(process.env.TOURIST_TAX_DEFAULT || '2.5');
-    const touristTax = (baseAmount + cleaningFee) * (touristTaxRate / 100);
-    const total = baseAmount + cleaningFee + touristTax;
+    // Calculate pricing (includes seasonal pricing + management/tourist fees from admin settings)
+    const pricing = await computeBookingPricing({
+      cottageId: cottage.id,
+      basePrice: cottage.basePrice,
+      defaultCleaningFee: Number(cottage.cleaningFee ?? 0),
+      startDate: data.startDate,
+      endDate: data.endDate,
+      withCleaning: Boolean(data.options?.cleaning),
+    });
 
     // Create temporary lock
     const lockId = await createTemporaryLock(data.cottageId, data.startDate, data.endDate, 15);
@@ -63,9 +64,9 @@ export async function POST(request: NextRequest) {
         endDate: data.endDate,
         guests: data.guests,
         options: data.options || {},
-        subtotal: baseAmount + cleaningFee,
-        touristTax,
-        total,
+        subtotal: pricing.subtotal,
+        touristTax: pricing.touristTax,
+        total: pricing.total,
         status: 'PENDING',
       },
     });
@@ -93,9 +94,9 @@ export async function POST(request: NextRequest) {
             currency: 'eur',
             product_data: {
               name: cottage.title,
-              description: `${nights} nuit${nights > 1 ? 's' : ''} - ${data.guests} invité${data.guests > 1 ? 's' : ''}`,
+              description: `${pricing.nights} nuit${pricing.nights > 1 ? 's' : ''} - ${data.guests} invité${data.guests > 1 ? 's' : ''}`,
             },
-            unit_amount: Math.round(total * 100), // Convert to cents
+            unit_amount: Math.round(pricing.total * 100), // Convert to cents
           },
           quantity: 1,
         },

@@ -38,10 +38,66 @@ type CottageJson = {
   amenities?: string[];
 };
 
+type BlogPostJson = {
+  id?: string;
+  title: string;
+  slug?: string;
+  keyword: string;
+  excerpt: string;
+  content: string[];
+  status?: 'DRAFT' | 'PUBLISHED';
+  createdAt?: string;
+};
+
+function toSlug(text: string): string {
+  return String(text)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
 function parseTime(text: string | undefined, fallback: string): string {
   if (!text) return fallback;
   const match = text.match(/(\d{1,2})[:h](\d{2})/);
   return match ? `${match[1].padStart(2, '0')}:${match[2]}` : fallback;
+}
+
+async function seedBlogPostsFromJson() {
+  const jsonPath = path.join(projectDir, 'src', 'content', 'blog-posts.json');
+  if (!fs.existsSync(jsonPath)) {
+    console.warn('blog-posts.json not found at', jsonPath, '- skipping blog seed from JSON');
+    return;
+  }
+
+  const raw = fs.readFileSync(jsonPath, 'utf-8');
+  const items = JSON.parse(raw) as BlogPostJson[];
+  const now = new Date().toISOString();
+  const posts = items.map((item) => {
+    const status = item.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT';
+    return {
+      id: item.id ?? `${toSlug(item.title)}-${Math.random().toString(36).slice(2, 8)}`,
+      title: item.title,
+      slug: item.slug ?? toSlug(item.title),
+      keyword: item.keyword,
+      excerpt: item.excerpt,
+      content: Array.isArray(item.content) ? item.content : [],
+      status,
+      publishedAt: status === 'PUBLISHED' ? now : null,
+      createdAt: item.createdAt ?? now,
+      updatedAt: now,
+    };
+  });
+
+  await prisma.siteContent.upsert({
+    where: { key: 'blog_posts' },
+    update: { value: posts },
+    create: { key: 'blog_posts', value: posts },
+  });
+
+  console.log('Upserted blog posts from JSON:', posts.length);
 }
 
 async function seedCottagesFromJson() {
@@ -153,6 +209,7 @@ async function main() {
 
   // Seed cottages from apps/web/src/content/cottages.json (upsert by slug)
   await seedCottagesFromJson();
+  await seedBlogPostsFromJson();
 
   // Create site content
   await prisma.siteContent.upsert({

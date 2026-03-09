@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const POPUP_STORAGE_KEY = 'gc_eco_booklet_popup_seen_v1';
-const PDF_URL = '/jeux-a-imprimer-green-cottage.pdf';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -19,6 +18,7 @@ export function EcoBookletPopup() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -41,15 +41,6 @@ export function EcoBookletPopup() {
   const closeBanner = () => {
     setVisible(false);
     markAsSeen();
-  };
-
-  const startDownload = () => {
-    const anchor = document.createElement('a');
-    anchor.href = PDF_URL;
-    anchor.download = 'jeux-a-imprimer-green-cottage.pdf';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -81,9 +72,10 @@ export function EcoBookletPopup() {
         throw new Error(payload.error ?? 'Erreur lors de la soumission');
       }
 
+      const payload = (await response.json()) as { pendingConfirmation?: boolean };
+      setPendingConfirmation(Boolean(payload.pendingConfirmation));
       setSuccess(true);
       markAsSeen();
-      startDownload();
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -115,20 +107,22 @@ export function EcoBookletPopup() {
             Livret d&apos;activités écologiques enfants
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Laissez votre email, acceptez le RGPD, puis téléchargez le PDF.
+            Laissez votre email, acceptez le RGPD, puis recevez le lien PDF par email.
           </p>
         </div>
 
         {success ? (
           <div className="space-y-2">
-            <p className="text-xs text-green-700">Merci ! Le téléchargement a démarré.</p>
-            <Button
-              type="button"
-              className="w-full bg-gc-green hover:bg-gc-green/90 text-white"
-              onClick={startDownload}
-            >
-              Télécharger à nouveau
-            </Button>
+            {pendingConfirmation ? (
+              <p className="text-xs text-green-700">
+                Merci ! Vérifiez votre email et confirmez votre inscription pour recevoir le lien de
+                téléchargement.
+              </p>
+            ) : (
+              <p className="text-xs text-green-700">
+                Merci ! Le lien de téléchargement vient d&apos;être envoyé par email.
+              </p>
+            )}
           </div>
         ) : (
           <form className="space-y-2.5" onSubmit={handleSubmit}>

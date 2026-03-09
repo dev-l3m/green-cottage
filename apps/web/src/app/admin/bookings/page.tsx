@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import AdminBookingsPanel, { type AdminBookingItem } from '@/components/admin/AdminBookingsPanel';
 
 async function getBookingsData() {
-  const [bookings, pending, paid, cancelled, refunded] = await Promise.all([
+  const [bookings, pending, confirmed, cancelled, refunded] = await Promise.all([
     prisma.booking.findMany({
       orderBy: { createdAt: 'desc' },
       take: 100,
@@ -26,6 +26,18 @@ async function getBookingsData() {
             invoiceNumber: true,
           },
         },
+        history: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            changedByUser: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+          take: 20,
+        },
       },
     }),
     prisma.booking.count({ where: { status: 'PENDING' } }),
@@ -34,11 +46,11 @@ async function getBookingsData() {
     prisma.booking.count({ where: { status: 'REFUNDED' } }),
   ]);
 
-  return { bookings, pending, paid, cancelled, refunded };
+  return { bookings, pending, confirmed, cancelled, refunded };
 }
 
 export default async function AdminBookingsPage() {
-  const { bookings, pending, paid, cancelled, refunded } = await getBookingsData();
+  const { bookings, pending, confirmed, cancelled, refunded } = await getBookingsData();
   const initialBookings: AdminBookingItem[] = bookings.map((booking) => ({
     id: booking.id,
     status: booking.status,
@@ -52,6 +64,15 @@ export default async function AdminBookingsPage() {
     userName: booking.user.name,
     userEmail: booking.user.email,
     invoiceNumber: booking.invoice?.invoiceNumber ?? null,
+    history: booking.history.map((event) => ({
+      id: event.id,
+      previousStatus: event.previousStatus,
+      newStatus: event.newStatus,
+      note: event.note,
+      createdAt: event.createdAt.toISOString(),
+      changedByName: event.changedByUser?.name ?? null,
+      changedByEmail: event.changedByUser?.email ?? null,
+    })),
   }));
 
   return (
@@ -67,8 +88,8 @@ export default async function AdminBookingsPage() {
           <p className="text-2xl font-bold">{pending}</p>
         </div>
         <div className="p-4 border rounded-lg">
-          <p className="text-sm text-muted-foreground">Payées</p>
-          <p className="text-2xl font-bold">{paid}</p>
+          <p className="text-sm text-muted-foreground">Confirmées</p>
+          <p className="text-2xl font-bold">{confirmed}</p>
         </div>
         <div className="p-4 border rounded-lg">
           <p className="text-sm text-muted-foreground">Annulées</p>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
@@ -43,7 +43,9 @@ function SignInForm() {
         });
         setLoading(false);
       } else {
-        router.push(callbackUrl);
+        const session = await getSession();
+        const isAdmin = (session?.user as any)?.role === 'ADMIN';
+        router.push(isAdmin ? '/admin' : callbackUrl);
         router.refresh();
       }
     } catch (error) {

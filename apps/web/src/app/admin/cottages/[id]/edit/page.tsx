@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +20,6 @@ type CottageEditData = {
   capacity: number;
   basePrice: number;
   images: string[];
-  ratingScore: number | null;
   comfortStars: number | null;
   heroImage: string | null;
   isActive: boolean;
@@ -47,11 +46,18 @@ export default function AdminEditCottagePage() {
     basePrice: 0,
     heroImage: '',
     imagesText: '',
-    ratingScore: 8.5,
     comfortStars: 4,
     isActive: true,
   });
   const uploadTemporarilyDisabled = true;
+  const galleryPreviewUrls = useMemo(
+    () =>
+      form.imagesText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    [form.imagesText]
+  );
 
   useEffect(() => {
     if (!cottageId) return;
@@ -74,7 +80,6 @@ export default function AdminEditCottagePage() {
           basePrice: data.basePrice ?? 0,
           heroImage: data.heroImage ?? data.images?.[0] ?? '',
           imagesText: (data.images ?? []).slice(1).join('\n'),
-          ratingScore: data.ratingScore ?? 8.5,
           comfortStars: data.comfortStars ?? 4,
           isActive: data.isActive ?? true,
         });
@@ -126,7 +131,6 @@ export default function AdminEditCottagePage() {
           basePrice: Number(form.basePrice),
           images,
           heroImage: form.heroImage.trim() || undefined,
-          ratingScore: Number(form.ratingScore),
           comfortStars: Number(form.comfortStars),
           isActive: form.isActive,
         }),
@@ -282,22 +286,6 @@ export default function AdminEditCottagePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="ratingScore" className="block text-sm font-medium mb-1">
-              Note /10
-            </label>
-            <input
-              id="ratingScore"
-              type="number"
-              min={0}
-              max={10}
-              step="0.1"
-              className="w-full rounded-md border px-3 py-2"
-              value={form.ratingScore}
-              onChange={(e) => setForm((s) => ({ ...s, ratingScore: Number(e.target.value) }))}
-              required
-            />
-          </div>
-          <div>
             <label htmlFor="comfortStars" className="block text-sm font-medium mb-1">
               Étoiles de confort
             </label>
@@ -313,6 +301,9 @@ export default function AdminEditCottagePage() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="rounded-md border px-3 py-2 text-sm text-muted-foreground">
+            La note est calculée automatiquement à partir des avis clients publiés.
           </div>
         </div>
 
@@ -353,6 +344,16 @@ export default function AdminEditCottagePage() {
               </label>
             )}
           </div>
+          {form.heroImage.trim() ? (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-2">Aperçu image principale</p>
+              <img
+                src={form.heroImage.trim()}
+                alt="Aperçu image principale"
+                className="w-full max-w-md h-48 object-cover rounded-md border bg-muted"
+              />
+            </div>
+          ) : null}
         </div>
 
         <div>
@@ -390,6 +391,21 @@ export default function AdminEditCottagePage() {
               </label>
             )}
           </div>
+          {galleryPreviewUrls.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-2">Aperçu images secondaires</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {galleryPreviewUrls.map((url, index) => (
+                  <img
+                    key={`${url}-${index}`}
+                    src={url}
+                    alt={`Aperçu image secondaire ${index + 1}`}
+                    className="w-full h-28 object-cover rounded-md border bg-muted"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <label className="inline-flex items-center gap-2 text-sm">

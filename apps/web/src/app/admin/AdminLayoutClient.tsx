@@ -5,16 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
+import { FooterAdmin } from '@/components/layout/footeradmin';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
+  LineChart,
   Home,
+  Users,
   Calendar,
   Star,
   FileText,
+  BookOpen,
+  Tags,
   Settings,
   Calendar as CalendarIcon,
+  Mail,
 } from 'lucide-react';
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -49,8 +54,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/admin/cottages', label: 'Cottages', icon: Home },
     { href: '/admin/bookings', label: 'Réservations', icon: Calendar },
+    { href: '/admin/clients', label: 'Clients', icon: Users },
+    { href: '/admin/pricing', label: 'Tarifs saisonniers', icon: Tags },
+    { href: '/admin/sales', label: 'Suivi des ventes', icon: LineChart },
     { href: '/admin/reviews', label: 'Avis', icon: Star },
+    { href: '/admin/blog', label: 'Blog', icon: BookOpen },
     { href: '/admin/invoices', label: 'Factures', icon: FileText },
+    { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
     { href: '/admin/ical', label: 'Calendriers iCal', icon: CalendarIcon },
     { href: '/admin/settings', label: 'Paramètres', icon: Settings },
   ];
@@ -76,7 +86,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </aside>
         <main className="flex-1 p-8">{children}</main>
       </div>
-      <Footer />
+      <FooterAdmin />
     </div>
   );
 }

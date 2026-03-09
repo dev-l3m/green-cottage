@@ -41,6 +41,14 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
+  phone         String?
+  addressLine1  String?
+  city          String?
+  postalCode    String?
+  country       String?
+  isProfessional Boolean @default(false)
+  companyName   String?
+  vatNumber     String?
   emailVerified DateTime?
   passwordHash  String?
   image         String?
@@ -51,6 +59,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   bookings      Booking[]
+  bookingHistoryChanges BookingHistory[]
   reviews       Review[]
 }
 
@@ -138,11 +147,28 @@ model Booking {
   user    User     @relation(fields: [userId], references: [id])
   invoice Invoice?
   review  Review?
+  history BookingHistory[]
 
   @@index([cottageId, startDate, endDate])
   @@index([userId])
   @@index([status])
   @@index([stripeSessionId])
+}
+
+model BookingHistory {
+  id              String         @id @default(cuid())
+  bookingId       String
+  previousStatus  BookingStatus?
+  newStatus       BookingStatus
+  note            String?        @db.Text
+  changedByUserId String?
+  createdAt       DateTime       @default(now())
+
+  booking         Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  changedByUser   User?          @relation(fields: [changedByUserId], references: [id])
+
+  @@index([bookingId, createdAt])
+  @@index([changedByUserId])
 }
 
 enum BookingStatus {
@@ -190,6 +216,12 @@ enum ReviewStatus {
   REJECTED
 }
 
+enum NewsletterStatus {
+  PENDING
+  SUBSCRIBED
+  UNSUBSCRIBED
+}
+
 model IcalFeed {
   id          String   @id @default(cuid())
   cottageId   String
@@ -213,6 +245,25 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 
   @@index([key])
+}
+
+model Newsletter {
+  id                          String           @id @default(cuid())
+  email                       String           @unique
+  source                      String           @default("eco-booklet-popup")
+  gdprConsentAt               DateTime
+  status                      NewsletterStatus @default(PENDING)
+  confirmedAt                 DateTime?
+  doubleOptInTokenHash        String?          @unique
+  doubleOptInTokenExpiresAt   DateTime?
+  downloadTokenHash           String?          @unique
+  downloadTokenExpiresAt      DateTime?
+  lastDownloadEmailSentAt     DateTime?
+  createdAt                   DateTime         @default(now())
+  updatedAt                   DateTime         @updatedAt
+
+  @@index([status])
+  @@map("newsletter")
 }
 
 model InvoiceCounter {

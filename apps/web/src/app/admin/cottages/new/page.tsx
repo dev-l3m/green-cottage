@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,6 @@ export default function AdminNewCottagePage() {
     capacity: 4,
     basePrice: 100,
     cleaningFee: 0,
-    ratingScore: 8.5,
     comfortStars: 4,
     heroImage: '',
     imagesText: '',
@@ -35,6 +34,14 @@ export default function AdminNewCottagePage() {
     isActive: true,
   });
   const uploadTemporarilyDisabled = true;
+  const galleryPreviewUrls = useMemo(
+    () =>
+      form.imagesText
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [form.imagesText]
+  );
 
   const uploadImage = async (file: File): Promise<string> => {
     const payload = new FormData();
@@ -79,7 +86,6 @@ export default function AdminNewCottagePage() {
           cleaningFee: Number(form.cleaningFee),
           images,
           heroImage: form.heroImage.trim() || undefined,
-          ratingScore: Number(form.ratingScore),
           comfortStars: Number(form.comfortStars),
           amenities,
           isActive: form.isActive,
@@ -239,22 +245,6 @@ export default function AdminNewCottagePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="ratingScore" className="block text-sm font-medium mb-1">
-              Note /10
-            </label>
-            <input
-              id="ratingScore"
-              type="number"
-              min={0}
-              max={10}
-              step="0.1"
-              className="w-full rounded-md border px-3 py-2"
-              value={form.ratingScore}
-              onChange={(e) => setForm((s) => ({ ...s, ratingScore: Number(e.target.value) }))}
-              required
-            />
-          </div>
-          <div>
             <label htmlFor="comfortStars" className="block text-sm font-medium mb-1">
               Étoiles de confort
             </label>
@@ -270,6 +260,9 @@ export default function AdminNewCottagePage() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="rounded-md border px-3 py-2 text-sm text-muted-foreground">
+            La note est calculée automatiquement à partir des avis clients publiés.
           </div>
         </div>
 
@@ -310,6 +303,16 @@ export default function AdminNewCottagePage() {
               </label>
             )}
           </div>
+          {form.heroImage.trim() ? (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-2">Aperçu image principale</p>
+              <img
+                src={form.heroImage.trim()}
+                alt="Aperçu image principale"
+                className="w-full max-w-md h-48 object-cover rounded-md border bg-muted"
+              />
+            </div>
+          ) : null}
         </div>
 
         <div>
@@ -348,6 +351,21 @@ export default function AdminNewCottagePage() {
               </label>
             )}
           </div>
+          {galleryPreviewUrls.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground mb-2">Aperçu images secondaires</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {galleryPreviewUrls.map((url, index) => (
+                  <img
+                    key={`${url}-${index}`}
+                    src={url}
+                    alt={`Aperçu image secondaire ${index + 1}`}
+                    className="w-full h-28 object-cover rounded-md border bg-muted"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <div>

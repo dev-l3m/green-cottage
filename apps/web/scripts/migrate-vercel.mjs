@@ -39,11 +39,19 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-// Vercel Postgres exige souvent ?sslmode=require (sauf pour prisma+postgres Accelerate)
+// Vercel Postgres exige souvent ?sslmode=require (sauf Accelerate),
+// mais ne pas forcer TLS sur une base locale.
+const isLocalDatabase =
+  databaseUrl.includes('localhost') ||
+  databaseUrl.includes('127.0.0.1') ||
+  databaseUrl.includes('host.docker.internal');
+
 const urlToUse =
-  databaseUrl.startsWith('prisma+') || databaseUrl.includes('sslmode=')
+  databaseUrl.startsWith('prisma+') || databaseUrl.includes('sslmode=') || isLocalDatabase
     ? databaseUrl
-    : databaseUrl.replace(/\?/, '?sslmode=require&');
+    : databaseUrl.includes('?')
+      ? databaseUrl.replace(/\?/, '?sslmode=require&')
+      : `${databaseUrl}?sslmode=require`;
 
 console.log('Migrations vers la BDD (URL depuis .env.local)...');
 

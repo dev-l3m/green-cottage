@@ -8,6 +8,8 @@ import AdminSettingsPanel, {
 const SETTINGS_KEYS = [
   'home_hero_title',
   'home_hero_description',
+  'booking_management_fee_percent',
+  'tourist_tax_percent',
   'invoice_company_name',
   'invoice_company_address',
   'invoice_company_email',
@@ -25,6 +27,8 @@ async function getAdminSettings(): Promise<AdminSettingsValues> {
   return {
     homeHeroTitle: byKey.get('home_hero_title')?.text ?? '',
     homeHeroDescription: byKey.get('home_hero_description')?.text ?? '',
+    bookingManagementFeePercent: byKey.get('booking_management_fee_percent')?.text ?? '0',
+    touristTaxPercent: byKey.get('tourist_tax_percent')?.text ?? '2.5',
     invoiceCompanyName: byKey.get('invoice_company_name')?.text ?? '',
     invoiceCompanyAddress: byKey.get('invoice_company_address')?.text ?? '',
     invoiceCompanyEmail: byKey.get('invoice_company_email')?.text ?? '',

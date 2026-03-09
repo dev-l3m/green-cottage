@@ -7,7 +7,7 @@ import AdminIcalPanel, {
 } from '../../../components/admin/AdminIcalPanel';
 
 async function getIcalData() {
-  const [feeds, cottages] = await Promise.all([
+  const [feeds, cottages, blocks] = await Promise.all([
     prisma.icalFeed.findMany({
       include: {
         cottage: {
@@ -28,13 +28,29 @@ async function getIcalData() {
       },
       orderBy: { createdAt: 'desc' },
     }),
+    prisma.availabilityBlock.findMany({
+      where: {
+        endDate: {
+          gte: new Date(),
+        },
+      },
+      select: {
+        id: true,
+        cottageId: true,
+        startDate: true,
+        endDate: true,
+        source: true,
+      },
+      orderBy: { startDate: 'asc' },
+      take: 500,
+    }),
   ]);
 
-  return { feeds, cottages };
+  return { feeds, cottages, blocks };
 }
 
 export default async function AdminIcalPage() {
-  const { feeds, cottages } = await getIcalData();
+  const { feeds, cottages, blocks } = await getIcalData();
   const initialFeeds: AdminIcalFeedItem[] = feeds.map((feed) => ({
     id: feed.id,
     cottageId: feed.cottageId,
@@ -49,6 +65,13 @@ export default async function AdminIcalPage() {
     title: cottage.title,
     slug: cottage.slug,
   }));
+  const initialBlocks = blocks.map((block) => ({
+    id: block.id,
+    cottageId: block.cottageId,
+    startDate: block.startDate.toISOString(),
+    endDate: block.endDate.toISOString(),
+    source: block.source,
+  }));
 
   return (
     <div>
@@ -56,7 +79,7 @@ export default async function AdminIcalPage() {
       <p className="text-muted-foreground mb-6">
         Gérez les flux iCal par gîte, ajoutez un lien d&apos;import et lancez une synchronisation manuelle.
       </p>
-      <AdminIcalPanel initialFeeds={initialFeeds} cottages={cottageOptions} />
+      <AdminIcalPanel initialFeeds={initialFeeds} cottages={cottageOptions} initialBlocks={initialBlocks} />
     </div>
   );
 }

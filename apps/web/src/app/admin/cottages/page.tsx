@@ -80,8 +80,29 @@ export default function AdminCottagesPage() {
           {cottages.map((cottage) => (
             <Card key={cottage.id}>
               <CardContent className="p-4">
+                <div className="mb-3 overflow-hidden rounded-md border bg-muted">
+                  {cottage.images?.[0] ? (
+                    <div
+                      className="h-40 w-full bg-cover bg-center"
+                      style={{ backgroundImage: `url("${cottage.images[0]}")` }}
+                      aria-label={`Photo du gîte ${cottage.title}`}
+                    />
+                  ) : (
+                    <div className="h-40 w-full flex items-center justify-center text-sm text-muted-foreground">
+                      Aucune photo
+                    </div>
+                  )}
+                </div>
                 <h3 className="font-semibold text-lg mb-2">{cottage.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{cottage.summary}</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {cottage.reviewsCount > 0
+                    ? `Note clients: ${Number(cottage.averageRating).toFixed(1)}/5 (${cottage.reviewsCount} avis)`
+                    : 'Note clients: aucun avis publié'}
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Photos disponibles: {Array.isArray(cottage.images) ? cottage.images.length : 0}
+                </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">
                     {cottage.basePrice}€/nuit • {cottage.capacity} personnes

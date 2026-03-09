@@ -5,13 +5,11 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { siteImages } from '@/lib/assets/images';
+import { DepartureChecklist } from '@/components/preparation/DepartureChecklist';
+import type { ChecklistItem } from '@/components/preparation/DepartureChecklist';
 import {
-  CheckCircle2,
   Package,
-  FileText,
-  Calendar,
   MapPin,
-  Sun,
   Key,
   MessageCircle,
 } from 'lucide-react';
@@ -22,11 +20,11 @@ export const metadata = {
     'Checklist avant départ, à apporter et infos pratiques pour un séjour réussi aux Résidences Vertes.',
 };
 
-const CHECKLIST_ITEMS = [
-  { text: "Confirmer votre heure d'arrivée avec l'équipe", icon: Calendar },
-  { text: "Préparer vos documents d'identité", icon: FileText },
-  { text: "Vérifier les équipements disponibles dans votre gîte", icon: Package },
-  { text: "Consulter la météo locale pour la région", icon: Sun },
+const CHECKLIST_ITEMS: ChecklistItem[] = [
+  { text: "Confirmer votre heure d'arrivée avec l'équipe", icon: 'calendar' },
+  { text: "Préparer vos documents d'identité", icon: 'fileText' },
+  { text: "Vérifier les équipements disponibles dans votre gîte", icon: 'package' },
+  { text: 'Consulter la météo locale pour la région', icon: 'sun' },
 ];
 
 const TO_BRING = [
@@ -83,22 +81,7 @@ export default function PreparationAuDepartPage() {
           <div className="max-w-2xl mx-auto">
             <Card className="border-gc-forest/20 overflow-hidden">
               <CardContent className="p-6 md:p-8">
-                <ul className="space-y-5 list-none p-0 m-0">
-                  {CHECKLIST_ITEMS.map((item, i) => {
-                    const Icon = item.icon;
-                    return (
-                      <li key={i} className="flex gap-4 items-start">
-                        <span className="flex-shrink-0 mt-0.5 text-gc-green" aria-hidden>
-                          <CheckCircle2 className="h-6 w-6" />
-                        </span>
-                        <span className="text-foreground pt-0.5">{item.text}</span>
-                        <span className="ml-auto flex-shrink-0 text-muted-foreground" aria-hidden>
-                          <Icon className="h-5 w-5" />
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <DepartureChecklist items={CHECKLIST_ITEMS} />
               </CardContent>
             </Card>
           </div>

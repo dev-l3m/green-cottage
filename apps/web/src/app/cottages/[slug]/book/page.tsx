@@ -16,9 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { formatCurrency, calculateNights } from '@/lib/utils';
-
-const DEFAULT_PRICE = 100;
+import { calculateNights } from '@/lib/utils';
 
 export default function BookPage({ params }: { params: { slug: string } }) {
   const router = useRouter();
@@ -28,12 +26,10 @@ export default function BookPage({ params }: { params: { slug: string } }) {
   const [cottage, setCottage] = useState<{
     id: string;
     title: string;
-    basePrice: number;
-    cleaningFee: number;
     capacity: number;
   } | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [devDialogOpen, setDevDialogOpen] = useState(false);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     startDate: '',
     endDate: '',
@@ -78,8 +74,6 @@ export default function BookPage({ params }: { params: { slug: string } }) {
           setCottage({
             id: data.id,
             title: data.title,
-            basePrice: typeof data.basePrice === 'number' ? data.basePrice : DEFAULT_PRICE,
-            cleaningFee: data.cleaningFee ?? 30,
             capacity: data.capacity ?? 4,
           });
         }
@@ -94,18 +88,12 @@ export default function BookPage({ params }: { params: { slug: string } }) {
   const effectiveCottage = cottage ?? {
     id: '',
     title: params.slug,
-    basePrice: DEFAULT_PRICE,
-    cleaningFee: 30,
     capacity: 4,
   };
 
   const nights = formData.startDate && formData.endDate
     ? calculateNights(formData.startDate, formData.endDate)
     : 0;
-  const baseAmount = effectiveCottage.basePrice * nights;
-  const cleaningFee = formData.options.cleaning ? effectiveCottage.cleaningFee : 0;
-  const touristTax = (baseAmount + cleaningFee) * 0.025;
-  const total = baseAmount + cleaningFee + touristTax;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +107,44 @@ export default function BookPage({ params }: { params: { slug: string } }) {
       return;
     }
 
-    // Pour le moment : afficher la fonctionnalité en cours de développement au lieu du paiement
-    setDevDialogOpen(true);
-    return;
+    if (!cottage) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cottageId: cottage.id,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          guests: formData.guests,
+          options: formData.options,
+        }),
+      });
+
+      if (res.status === 401) {
+        const callback = encodeURIComponent(`/cottages/${params.slug}/book`);
+        router.push(`/auth/signin?callbackUrl=${callback}`);
+        return;
+      }
+
+      const payload = await res.json();
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Impossible d’envoyer la réservation');
+      }
+
+      setRequestDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description:
+          error instanceof Error ? error.message : 'Impossible d’envoyer votre demande.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (fetchError && !cottage) {
@@ -210,7 +233,7 @@ export default function BookPage({ params }: { params: { slug: string } }) {
                         })
                       }
                     />
-                    <span>Ménage final ({formatCurrency(effectiveCottage.cleaningFee)})</span>
+                    <span>Ménage final (option)</span>
                   </label>
                   <label className="flex items-center space-x-2">
                     <input
@@ -237,22 +260,20 @@ export default function BookPage({ params }: { params: { slug: string } }) {
                 <CardContent className="space-y-4">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>{effectiveCottage.basePrice.toFixed(0)}€ × {nights} nuit{nights > 1 ? 's' : ''}</span>
-                      <span>{formatCurrency(baseAmount)}</span>
+                      <span>Durée du séjour</span>
+                      <span>{nights > 0 ? `${nights} nuit${nights > 1 ? 's' : ''}` : '-'}</span>
                     </div>
-                    {formData.options.cleaning && (
-                      <div className="flex justify-between">
-                        <span>Ménage</span>
-                        <span>{formatCurrency(cleaningFee)}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
-                      <span>Taxe de séjour</span>
-                      <span>{formatCurrency(touristTax)}</span>
+                      <span>Voyageurs</span>
+                      <span>{formData.guests}</span>
                     </div>
-                    <div className="border-t pt-2 flex justify-between font-semibold">
-                      <span>Total</span>
-                      <span>{formatCurrency(total)}</span>
+                    <div className="flex justify-between">
+                      <span>Ménage final</span>
+                      <span>{formData.options.cleaning ? 'Oui' : 'Non'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Petit-déjeuner</span>
+                      <span>{formData.options.breakfast ? 'Oui' : 'Non'}</span>
                     </div>
                   </div>
                   <Button
@@ -261,10 +282,10 @@ export default function BookPage({ params }: { params: { slug: string } }) {
                     size="lg"
                     disabled={loading || !cottage}
                   >
-                    {loading ? 'Traitement...' : !cottage ? 'Chargement...' : 'Procéder au paiement'}
+                    {loading ? 'Traitement...' : !cottage ? 'Chargement...' : 'Confirmer ma demande'}
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    Paiement sécurisé par Stripe
+                    Demande de réservation sans paiement immédiat. Confirmation par l&apos;équipe.
                   </p>
                 </CardContent>
               </Card>
@@ -272,17 +293,21 @@ export default function BookPage({ params }: { params: { slug: string } }) {
           </div>
         </form>
 
-        <Dialog open={devDialogOpen} onOpenChange={setDevDialogOpen}>
+        <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Fonctionnalité en cours de développement</DialogTitle>
+              <DialogTitle>Demande envoyée</DialogTitle>
             </DialogHeader>
             <p className="text-muted-foreground">
-              La réservation et le paiement en ligne seront bientôt disponibles. Merci de votre patience.
+              Votre demande de réservation a bien été envoyée. Notre équipe va la traiter et vous
+              confirmer la disponibilité rapidement.
             </p>
             <DialogFooter>
-              <Button type="button" onClick={() => setDevDialogOpen(false)}>
-                Fermer
+              <Button type="button" onClick={() => router.push('/account')}>
+                Voir mes réservations
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setRequestDialogOpen(false)}>
+                Continuer
               </Button>
             </DialogFooter>
           </DialogContent>

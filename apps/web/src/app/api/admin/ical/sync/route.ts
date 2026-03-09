@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/middleware';
 import { prisma } from '@/lib/prisma';
-import { syncICalFeed } from '@/lib/ical';
+import { ICalSyncError, syncICalFeed } from '@/lib/ical';
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof ICalSyncError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error syncing iCal feed:', error);
-    return NextResponse.json({ error: 'Failed to sync iCal feed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Synchronisation iCal impossible pour le moment.' },
+      { status: 500 }
+    );
   }
 }

@@ -2,22 +2,59 @@ import ICAL from 'ical.js';
 import { prisma } from './prisma';
 import type { AvailabilityBlock } from '@prisma/client';
 
+export class ICalSyncError extends Error {
+  status: number;
+
+  constructor(message: string, status = 400) {
+    super(message);
+    this.name = 'ICalSyncError';
+    this.status = status;
+  }
+}
+
 export async function parseICalFeed(url: string): Promise<Array<{ start: Date; end: Date; uid?: string }>> {
+  let parsedUrl: URL;
   try {
-    const response = await fetch(url, {
+    parsedUrl = new URL(url);
+  } catch {
+    throw new ICalSyncError('URL iCal invalide. Vérifiez le lien fourni.', 400);
+  }
+
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    throw new ICalSyncError('URL iCal invalide. Seuls les liens HTTP/HTTPS sont acceptés.', 400);
+  }
+
+  try {
+    const response = await fetch(parsedUrl.toString(), {
       headers: {
         'User-Agent': 'Green Cottage Calendar Sync',
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch iCal feed: ${response.statusText}`);
+      const statusMessage =
+        response.status === 404
+          ? 'Le flux iCal est introuvable (404). Vérifiez l’URL de partage.'
+          : response.status === 401 || response.status === 403
+          ? 'Accès refusé au flux iCal (401/403). Vérifiez que le lien est public.'
+          : `Impossible de récupérer le flux iCal (HTTP ${response.status}).`;
+      throw new ICalSyncError(statusMessage, 502);
     }
 
     const icsText = await response.text();
+    if (!icsText.includes('BEGIN:VCALENDAR')) {
+      throw new ICalSyncError(
+        'Le contenu reçu ne semble pas être un fichier iCal valide (VCALENDAR manquant).',
+        422
+      );
+    }
+
     const jcalData = ICAL.parse(icsText);
     const comp = new ICAL.Component(jcalData);
     const vevents = comp.getAllSubcomponents('vevent');
+    if (vevents.length === 0) {
+      throw new ICalSyncError('Le flux iCal ne contient aucun événement.', 422);
+    }
 
     const events = vevents.map((vevent) => {
       const event = new ICAL.Event(vevent);
@@ -30,8 +67,11 @@ export async function parseICalFeed(url: string): Promise<Array<{ start: Date; e
 
     return events;
   } catch (error) {
+    if (error instanceof ICalSyncError) {
+      throw error;
+    }
     console.error('Error parsing iCal feed:', error);
-    throw error;
+    throw new ICalSyncError('Erreur technique lors de la lecture du flux iCal.', 500);
   }
 }
 

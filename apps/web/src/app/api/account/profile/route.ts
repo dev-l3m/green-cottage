@@ -6,6 +6,14 @@ import { prisma } from '@/lib/prisma';
 const profileSchema = z.object({
   name: z.string().trim().min(1, 'Le nom est requis').max(120, 'Nom trop long'),
   email: z.string().trim().email('Email invalide').max(320, 'Email trop long'),
+  phone: z.string().trim().max(40).optional().default(''),
+  addressLine1: z.string().trim().max(160).optional().default(''),
+  city: z.string().trim().max(100).optional().default(''),
+  postalCode: z.string().trim().max(20).optional().default(''),
+  country: z.string().trim().max(100).optional().default(''),
+  isProfessional: z.boolean().optional().default(false),
+  companyName: z.string().trim().max(160).optional().default(''),
+  vatNumber: z.string().trim().max(60).optional().default(''),
 });
 
 export async function GET(request: NextRequest) {
@@ -18,6 +26,14 @@ export async function GET(request: NextRequest) {
       select: {
         name: true,
         email: true,
+        phone: true,
+        addressLine1: true,
+        city: true,
+        postalCode: true,
+        country: true,
+        isProfessional: true,
+        companyName: true,
+        vatNumber: true,
       },
     });
 
@@ -56,10 +72,26 @@ export async function PATCH(request: NextRequest) {
       data: {
         name: data.name,
         email,
+        phone: data.phone || null,
+        addressLine1: data.addressLine1 || null,
+        city: data.city || null,
+        postalCode: data.postalCode || null,
+        country: data.country || null,
+        isProfessional: data.isProfessional,
+        companyName: data.isProfessional ? data.companyName || null : null,
+        vatNumber: data.isProfessional ? data.vatNumber || null : null,
       },
       select: {
         name: true,
         email: true,
+        phone: true,
+        addressLine1: true,
+        city: true,
+        postalCode: true,
+        country: true,
+        isProfessional: true,
+        companyName: true,
+        vatNumber: true,
       },
     });
 

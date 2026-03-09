@@ -41,7 +41,39 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(cottages);
+    const reviewStats = await prisma.publicReview.groupBy({
+      by: ['cottageId'],
+      where: {
+        status: 'PUBLISHED',
+      },
+      _avg: {
+        rating: true,
+      },
+      _count: {
+        rating: true,
+      },
+    });
+
+    const statsByCottageId = new Map(
+      reviewStats.map((item) => [
+        item.cottageId,
+        {
+          averageRating: item._avg.rating ?? null,
+          reviewsCount: item._count.rating,
+        },
+      ])
+    );
+
+    const cottagesWithStats = cottages.map((cottage) => {
+      const stats = statsByCottageId.get(cottage.id);
+      return {
+        ...cottage,
+        averageRating: stats?.averageRating ?? null,
+        reviewsCount: stats?.reviewsCount ?? 0,
+      };
+    });
+
+    return NextResponse.json(cottagesWithStats);
   } catch (error) {
     console.error('Error fetching cottages:', error);
     return NextResponse.json({ error: 'Failed to fetch cottages' }, { status: 500 });

@@ -6,6 +6,16 @@ import { Button } from '@/components/ui/button';
 
 type BookingStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED';
 
+type BookingHistoryItem = {
+  id: string;
+  previousStatus: BookingStatus | null;
+  newStatus: BookingStatus;
+  note: string | null;
+  createdAt: string;
+  changedByName: string | null;
+  changedByEmail: string | null;
+};
+
 export type AdminBookingItem = {
   id: string;
   status: BookingStatus;
@@ -19,11 +29,12 @@ export type AdminBookingItem = {
   userName: string | null;
   userEmail: string;
   invoiceNumber: string | null;
+  history: BookingHistoryItem[];
 };
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
   PENDING: 'En attente',
-  PAID: 'Payée',
+  PAID: 'Confirmée',
   CANCELLED: 'Annulée',
   REFUNDED: 'Remboursée',
 };
@@ -31,7 +42,7 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
 const FILTERS: Array<{ key: 'ALL' | BookingStatus; label: string }> = [
   { key: 'ALL', label: 'Toutes' },
   { key: 'PENDING', label: 'En attente' },
-  { key: 'PAID', label: 'Payées' },
+  { key: 'PAID', label: 'Confirmées' },
   { key: 'CANCELLED', label: 'Annulées' },
   { key: 'REFUNDED', label: 'Remboursées' },
 ];
@@ -44,6 +55,7 @@ export default function AdminBookingsPanel({
   const [bookings, setBookings] = useState(initialBookings);
   const [activeFilter, setActiveFilter] = useState<'ALL' | BookingStatus>('ALL');
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [statusNotes, setStatusNotes] = useState<Record<string, string>>({});
 
   const filtered = useMemo(() => {
     if (activeFilter === 'ALL') return bookings;
@@ -53,16 +65,38 @@ export default function AdminBookingsPanel({
   const updateStatus = async (bookingId: string, nextStatus: BookingStatus) => {
     setPendingId(bookingId);
     try {
+      const note = statusNotes[bookingId]?.trim();
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({
+          status: nextStatus,
+          note: note || undefined,
+        }),
       });
       if (!res.ok) throw new Error('Failed to update booking status');
 
+      const nowIso = new Date().toISOString();
       setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? { ...b, status: nextStatus } : b))
+        prev.map((b) => {
+          if (b.id !== bookingId) return b;
+          const historyEntry: BookingHistoryItem = {
+            id: `${bookingId}-${nowIso}`,
+            previousStatus: b.status,
+            newStatus: nextStatus,
+            note: note || null,
+            createdAt: nowIso,
+            changedByName: 'Admin',
+            changedByEmail: null,
+          };
+          return {
+            ...b,
+            status: nextStatus,
+            history: [historyEntry, ...b.history],
+          };
+        })
       );
+      setStatusNotes((prev) => ({ ...prev, [bookingId]: '' }));
     } catch (error) {
       console.error(error);
     } finally {
@@ -131,10 +165,23 @@ export default function AdminBookingsPanel({
                   disabled={isPending}
                 >
                   <option value="PENDING">En attente</option>
-                  <option value="PAID">Payée</option>
+                  <option value="PAID">Confirmée</option>
                   <option value="CANCELLED">Annulée</option>
                   <option value="REFUNDED">Remboursée</option>
                 </select>
+                <input
+                  type="text"
+                  value={statusNotes[booking.id] ?? ''}
+                  onChange={(e) =>
+                    setStatusNotes((prev) => ({
+                      ...prev,
+                      [booking.id]: e.target.value,
+                    }))
+                  }
+                  placeholder="Note interne (optionnelle)"
+                  className="h-9 rounded-md border bg-background px-3 text-sm min-w-[240px]"
+                  disabled={isPending}
+                />
 
                 {booking.invoiceNumber && (
                   <Link href={`/api/invoices/${booking.id}/download`}>
@@ -142,6 +189,29 @@ export default function AdminBookingsPanel({
                       Facture {booking.invoiceNumber}
                     </Button>
                   </Link>
+                )}
+              </div>
+
+              <div className="mt-4 border-t pt-3">
+                <p className="text-sm font-medium mb-2">Historique</p>
+                {booking.history.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Aucun événement enregistré.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {booking.history.map((event) => (
+                      <div key={event.id} className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          {new Date(event.createdAt).toLocaleString('fr-FR')}
+                        </span>{' '}
+                        - {event.previousStatus ? STATUS_LABEL[event.previousStatus] : 'Création'} →{' '}
+                        {STATUS_LABEL[event.newStatus]}
+                        {event.changedByName || event.changedByEmail ? (
+                          <> (par {event.changedByName ?? event.changedByEmail})</>
+                        ) : null}
+                        {event.note ? <> - {event.note}</> : null}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

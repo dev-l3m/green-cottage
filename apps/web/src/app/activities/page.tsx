@@ -1,38 +1,41 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import Link from 'next/link';
-import {
-  TreePine,
-  Waves,
-  Leaf,
-  LayoutGrid,
-} from 'lucide-react';
-import { LocationMap } from '@/components/cottages/LocationMap';
+import dynamic from 'next/dynamic';
 import { siteImages } from '@/lib/assets/images';
-import activitiesData from '@/content/activities.json';
+import activitiesList from '@/content/activites-list.json';
 
-type ActivitiesData = typeof activitiesData;
-
-const onSiteIcons = [TreePine, Waves, Leaf, LayoutGrid];
+const ActivitiesExplorer = dynamic(
+  () =>
+    import('@/components/activities/ActivitiesExplorer').then(
+      (mod) => mod.ActivitiesExplorer
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-3xl border border-border bg-card p-6 text-sm text-muted-foreground">
+        Chargement de la carte interactive...
+      </div>
+    ),
+  }
+);
 
 export const metadata = {
-  title: 'Activités & Restos | Green Cottage',
-  description: activitiesData.hero.description,
+  title: 'Sorties & restos | Green Cottage',
+  description:
+    "Découvrez les meilleures sorties, activités et restaurants autour des gîtes Green Cottage, classés par thème et par distance.",
 };
 
 export default function ActivitiesPage() {
-  const data = activitiesData as ActivitiesData;
+  const total = activitiesList.length;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header />
+
       <main className="flex-1">
-        {/* Hero */}
         <section
-          className="relative min-h-[380px] md:min-h-[440px] flex flex-col justify-end overflow-hidden"
+          className="relative min-h-[360px] md:min-h-[430px] flex items-end overflow-hidden"
           aria-labelledby="activities-heading"
         >
           <div className="absolute inset-0">
@@ -44,130 +47,59 @@ export default function ActivitiesPage() {
               className="object-cover"
               sizes="100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/65" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
           </div>
-          <div className="relative z-10 container px-4 pb-12 pt-20">
-            <h1
-              id="activities-heading"
-              className="font-heading text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
-            >
-              {data.hero.title}
-            </h1>
-            <p className="text-xl md:text-2xl text-white/95 font-medium mt-2 drop-shadow">
-              {data.hero.subtitle}
-            </p>
-            <p className="text-white/90 mt-4 max-w-2xl">
-              {data.hero.description}
+
+          <div className="relative z-10 container px-4 pb-12 pt-24">
+            <div className="max-w-3xl">
+              <span className="inline-flex rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur">
+                Autour des gîtes
+              </span>
+
+              <h1
+                id="activities-heading"
+                className="mt-5 font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
+              >
+                Sorties & restos
+              </h1>
+
+              <p className="mt-4 text-lg md:text-xl text-white/90 leading-relaxed">
+                On a pensé à tout pour vos escapades en amoureux, entre amis ou
+                en famille. Explorez notre sélection d’activités et de
+                restaurants autour des gîtes, classés par thème et par distance.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/90">
+                <span className="rounded-full bg-white/10 px-3 py-1.5 backdrop-blur">
+                  {total} adresses sélectionnées
+                </span>
+                <span className="rounded-full bg-white/10 px-3 py-1.5 backdrop-blur">
+                  Carte interactive
+                </span>
+                <span className="rounded-full bg-white/10 px-3 py-1.5 backdrop-blur">
+                  Tableau triable
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="container px-4 py-10 md:py-14">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="text-lg text-muted-foreground leading-8">
+              Sélectionnez vos envies sur la carte ou parcourez le tableau
+              ci-dessous pour trouver rapidement une sortie nature, un restaurant,
+              une activité familiale, un escape game ou une découverte
+              culturelle à proximité.
             </p>
           </div>
         </section>
 
-        <div className="container px-4 max-w-6xl mx-auto">
-          {/* Introduction */}
-          <section className="py-12 md:py-16" aria-labelledby="intro-heading">
-            <h2 id="intro-heading" className="sr-only">
-              Introduction
-            </h2>
-            <div className="max-w-2xl mx-auto text-center space-y-4 text-muted-foreground leading-relaxed">
-              {data.introduction.content.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
-          </section>
-
-          {/* Sur place - 4 cards */}
-          <section
-            className="py-12 md:py-16"
-            aria-labelledby="on-site-heading"
-          >
-            <h2
-              id="on-site-heading"
-              className="font-heading text-2xl md:text-3xl font-semibold mb-8 text-center"
-            >
-              {data.onSite.title}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {data.onSite.items.map((item, i) => {
-                const Icon = onSiteIcons[i] ?? Leaf;
-                return (
-                  <Card
-                    key={i}
-                    className="rounded-xl border-gc-forest/20 bg-white shadow-sm overflow-hidden"
-                  >
-                    <CardContent className="p-6 text-center sm:text-left">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gc-green/10 text-gc-green mb-4 mx-auto sm:mx-0">
-                        <Icon className="h-5 w-5" aria-hidden />
-                      </div>
-                      <h3 className="font-heading font-semibold text-lg mb-2 text-foreground">
-                        {item.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {item.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Aux alentours - categories in columns */}
-          <section
-            className="py-12 md:py-16 bg-muted/30 rounded-2xl px-6 md:px-8 -mx-4 md:mx-0"
-            aria-labelledby="around-heading"
-          >
-            <h2
-              id="around-heading"
-              className="font-heading text-2xl md:text-3xl font-semibold mb-2"
-            >
-              {data.around.title}
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-2xl">
-              {data.around.description}
-            </p>
-          </section>
-
-          {/* Map - même composant que les gîtes */}
-          <section
-            className="py-12 md:py-16"
-            aria-labelledby="map-heading"
-          >
-            <h2
-              id="map-heading"
-              className="font-heading text-2xl md:text-3xl font-semibold mb-4"
-            >
-              {data.map.title}
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-2xl">
-              {data.map.description}
-            </p>
-            <LocationMap />
-          </section>
-
-          {/* Call to action */}
-          <section
-            className="py-12 md:py-16 rounded-2xl px-6 md:px-10 bg-primary/10 border border-primary/20"
-            aria-labelledby="cta-heading"
-          >
-            <h2
-              id="cta-heading"
-              className="font-heading text-2xl md:text-3xl font-semibold mb-4 text-center"
-            >
-              {data.callToAction.title}
-            </h2>
-            <p className="text-muted-foreground text-center max-w-xl mx-auto mb-8">
-              {data.callToAction.description}
-            </p>
-            <div className="flex justify-center">
-              <Link href="/cottages">
-                <Button size="lg" className="rounded-xl">
-                  Découvrir nos gîtes
-                </Button>
-              </Link>
-            </div>
-          </section>
-        </div>
+        <section className="container px-4 pb-16 md:pb-20">
+          <ActivitiesExplorer items={activitiesList} />
+        </section>
       </main>
+
       <Footer />
     </div>
   );

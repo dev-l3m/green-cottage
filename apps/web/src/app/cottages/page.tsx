@@ -107,6 +107,50 @@ export default async function CottagesPage() {
             </>
           )}
         </section>
+
+        <section className="container pb-14 md:pb-20" aria-labelledby="seo-gites-nature-heading">
+          <div className="mx-auto max-w-4xl rounded-2xl border bg-muted/20 p-6 md:p-8">
+            <h2
+              id="seo-gites-nature-heading"
+              className="font-heading text-2xl md:text-3xl font-semibold mb-5"
+            >
+              Nos <strong>gîtes en pleine nature</strong>
+            </h2>
+            <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <p>
+                Situés au cœur d&apos;un environnement préservé, nos{' '}
+                <strong>gîtes en pleine nature</strong> vous accueillent pour un séjour ressourçant en
+                famille, entre amis ou en couple. Nichés en lisière de forêt, les gîtes L3M Green Cottage
+                offrent un cadre calme et authentique où il est possible de se reconnecter à l&apos;essentiel
+                : la nature, le calme et le temps partagé.
+              </p>
+              <p>
+                Nos hébergements sont conçus pour profiter pleinement de la tranquillité de la forêt tout en
+                bénéficiant d&apos;un confort moderne. Chaque logement dispose d&apos;espaces de vie
+                chaleureux, de chambres confortables et d&apos;un accès direct à l&apos;extérieur pour
+                profiter du grand air. Ici, le séjour se vit au rythme de la nature : promenades en forêt,
+                observation des animaux, jeux en extérieur et moments de détente loin du bruit des villes.
+              </p>
+              <p>
+                Les <strong>gîtes en pleine nature</strong> de Green Cottage sont également pensés pour
+                accueillir les familles. Les enfants peuvent explorer les alentours, profiter des espaces de
+                jeux et découvrir la richesse de l&apos;environnement naturel. C&apos;est l&apos;endroit idéal
+                pour partager des activités simples et créer des souvenirs inoubliables pendant les vacances.
+              </p>
+              <p>
+                Situés en Isère, nos gîtes bénéficient d&apos;une localisation idéale pour découvrir la
+                région et ses nombreuses activités : randonnées, visites culturelles, activités de plein air
+                ou sorties en famille. Après une journée d&apos;exploration, vous retrouverez le calme et la
+                sérénité de votre hébergement au milieu de la nature.
+              </p>
+              <p>
+                Séjourner dans nos <strong>gîtes en pleine nature</strong>, c&apos;est choisir une expérience
+                authentique, conviviale et respectueuse de l&apos;environnement, où chacun peut se ressourcer
+                et profiter pleinement de la beauté des paysages.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

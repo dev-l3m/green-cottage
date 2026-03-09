@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 export type AdminIcalFeedItem = {
   id: string;
@@ -20,12 +22,22 @@ export type AdminIcalCottageOption = {
   slug: string;
 };
 
+export type AdminIcalBlockItem = {
+  id: string;
+  cottageId: string;
+  startDate: string;
+  endDate: string;
+  source: 'INTERNAL' | 'ICAL';
+};
+
 export default function AdminIcalPanel({
   initialFeeds,
   cottages,
+  initialBlocks,
 }: {
   initialFeeds: AdminIcalFeedItem[];
   cottages: AdminIcalCottageOption[];
+  initialBlocks: AdminIcalBlockItem[];
 }) {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
@@ -35,6 +47,13 @@ export default function AdminIcalPanel({
     cottageId: cottages[0]?.id ?? '',
     importUrl: '',
   });
+  const [calendarCottageId, setCalendarCottageId] = useState(cottages[0]?.id ?? '');
+
+  const selectedBlocks = initialBlocks.filter((block) => block.cottageId === calendarCottageId);
+  const disabledDays = selectedBlocks.map((block) => ({
+    from: new Date(block.startDate),
+    to: new Date(block.endDate),
+  }));
 
   const createFeed = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,13 +94,14 @@ export default function AdminIcalPanel({
           importUrl: feed.importUrl,
         }),
       });
+      const payload = (await res.json()) as { error?: string };
       if (!res.ok) {
-        throw new Error('Échec de la synchronisation iCal');
+        throw new Error(payload.error ?? 'Échec de la synchronisation iCal');
       }
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError('La synchronisation iCal a échoué');
+      setError(err instanceof Error ? err.message : 'La synchronisation iCal a échoué');
     } finally {
       setSyncingId(null);
     }
@@ -170,6 +190,38 @@ export default function AdminIcalPanel({
           ))}
         </div>
       )}
+
+      <div className="border rounded-lg p-4 space-y-4">
+        <h2 className="font-semibold text-lg">Calendrier des disponibilités (iCal + blocages)</h2>
+        <div className="max-w-sm">
+          <label htmlFor="calendar-cottage" className="block text-sm font-medium mb-1">
+            Gîte
+          </label>
+          <select
+            id="calendar-cottage"
+            className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+            value={calendarCottageId}
+            onChange={(e) => setCalendarCottageId(e.target.value)}
+          >
+            {cottages.map((cottage) => (
+              <option key={cottage.id} value={cottage.id}>
+                {cottage.title} ({cottage.slug})
+              </option>
+            ))}
+          </select>
+        </div>
+        <DayPicker
+          mode="single"
+          numberOfMonths={2}
+          disabled={disabledDays}
+          modifiersClassNames={{
+            disabled: 'bg-red-100 text-red-700 line-through',
+          }}
+        />
+        <p className="text-sm text-muted-foreground">
+          Les dates barrées sont indisponibles (réservations internes + imports iCal).
+        </p>
+      </div>
     </div>
   );
 }

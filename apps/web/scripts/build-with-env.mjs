@@ -86,6 +86,10 @@ const migrateShell = prismaBin
 r = run(isWin ? 'cmd' : 'sh', [isWin ? '/c' : '-c', migrateShell]);
 if (r.status !== 0) {
   process.stderr.write('[build-with-env] prisma migrate deploy failed (continuing with next build)\n');
+  if (env.VERCEL === '1') {
+    process.stderr.write('[build-with-env] On Vercel, stopping build because migrations failed.\n');
+    process.exit(r.status ?? 1);
+  }
 }
 
 // 2.5 Optional one-time seed for deployment (guarded by DB marker).

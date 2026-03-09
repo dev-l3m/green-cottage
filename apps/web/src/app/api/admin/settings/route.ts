@@ -6,6 +6,8 @@ import { prisma } from '@/lib/prisma';
 const settingsSchema = z.object({
   homeHeroTitle: z.string().default(''),
   homeHeroDescription: z.string().default(''),
+  bookingManagementFeePercent: z.string().default('0'),
+  touristTaxPercent: z.string().default('2.5'),
   invoiceCompanyName: z.string().default(''),
   invoiceCompanyAddress: z.string().default(''),
   invoiceCompanyEmail: z.string().default(''),
@@ -15,6 +17,8 @@ const settingsSchema = z.object({
 const settingsToKeys = (data: z.infer<typeof settingsSchema>) => [
   { key: 'home_hero_title', text: data.homeHeroTitle },
   { key: 'home_hero_description', text: data.homeHeroDescription },
+  { key: 'booking_management_fee_percent', text: data.bookingManagementFeePercent },
+  { key: 'tourist_tax_percent', text: data.touristTaxPercent },
   { key: 'invoice_company_name', text: data.invoiceCompanyName },
   { key: 'invoice_company_address', text: data.invoiceCompanyAddress },
   { key: 'invoice_company_email', text: data.invoiceCompanyEmail },
@@ -29,6 +33,8 @@ export async function GET(request: NextRequest) {
     const keys = settingsToKeys({
       homeHeroTitle: '',
       homeHeroDescription: '',
+      bookingManagementFeePercent: '0',
+      touristTaxPercent: '2.5',
       invoiceCompanyName: '',
       invoiceCompanyAddress: '',
       invoiceCompanyEmail: '',
@@ -44,6 +50,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       homeHeroTitle: byKey.get('home_hero_title')?.text ?? '',
       homeHeroDescription: byKey.get('home_hero_description')?.text ?? '',
+      bookingManagementFeePercent: byKey.get('booking_management_fee_percent')?.text ?? '0',
+      touristTaxPercent: byKey.get('tourist_tax_percent')?.text ?? '2.5',
       invoiceCompanyName: byKey.get('invoice_company_name')?.text ?? '',
       invoiceCompanyAddress: byKey.get('invoice_company_address')?.text ?? '',
       invoiceCompanyEmail: byKey.get('invoice_company_email')?.text ?? '',
