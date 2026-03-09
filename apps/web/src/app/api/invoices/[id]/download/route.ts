@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { generateInvoicePDF } from '@/lib/invoice';
 
 export async function GET(
   request: NextRequest,
@@ -31,11 +32,23 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    if (!booking.invoice?.pdfData) {
+    if (!booking.invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    const pdfBuffer = booking.invoice.pdfData as Buffer;
+    const regeneratedPdf = await generateInvoicePDF({
+      ...booking,
+      invoice: booking.invoice,
+    });
+
+    await prisma.invoice.update({
+      where: { bookingId: booking.id },
+      data: {
+        pdfData: Buffer.from(regeneratedPdf),
+      },
+    });
+
+    const pdfBuffer = Buffer.from(regeneratedPdf);
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',

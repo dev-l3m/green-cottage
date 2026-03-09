@@ -7,9 +7,23 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { formatDateRange, formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
-import { Download } from 'lucide-react';
+import { Download, ChevronDown } from 'lucide-react';
 import { PasswordField } from '@/components/ui/password-field';
 import { isStrongPassword } from '@/lib/password';
 
@@ -27,9 +41,13 @@ type ProfileForm = {
 };
 
 export default function AccountPage() {
+  const ITEMS_PER_PAGE = 3;
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
+  const [expandedBookings, setExpandedBookings] = useState<Record<string, boolean>>({});
+  const [reservationsPage, setReservationsPage] = useState(1);
+  const [invoicesPage, setInvoicesPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [profileForm, setProfileForm] = useState<ProfileForm>({
     name: '',
@@ -54,6 +72,10 @@ export default function AccountPage() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [bookingToCancelId, setBookingToCancelId] = useState<string | null>(null);
+  const [cancelDialogError, setCancelDialogError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -66,6 +88,11 @@ export default function AccountPage() {
       fetchBookings();
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    setReservationsPage(1);
+    setInvoicesPage(1);
+  }, [bookings]);
 
   const fetchProfile = async () => {
     try {
@@ -180,6 +207,133 @@ export default function AccountPage() {
   };
 
   const paidInvoices = bookings.filter((booking) => booking.status === 'PAID' && booking.invoice);
+  const paymentHistory = [...paidInvoices].sort(
+    (a, b) =>
+      new Date(getPaymentDateValue(b)).getTime() -
+      new Date(getPaymentDateValue(a)).getTime()
+  );
+  const reservationsTotalPages = Math.max(1, Math.ceil(bookings.length / ITEMS_PER_PAGE));
+  const invoicesTotalPages = Math.max(1, Math.ceil(paymentHistory.length / ITEMS_PER_PAGE));
+  const paginatedBookings = bookings.slice(
+    (reservationsPage - 1) * ITEMS_PER_PAGE,
+    reservationsPage * ITEMS_PER_PAGE
+  );
+  const paginatedPaymentHistory = paymentHistory.slice(
+    (invoicesPage - 1) * ITEMS_PER_PAGE,
+    invoicesPage * ITEMS_PER_PAGE
+  );
+
+  const getBookingDisplayStatus = (booking: any) => {
+    if (booking.status === 'PAID') {
+      const hasEnded = new Date(booking.endDate).getTime() < Date.now();
+      if (hasEnded) return 'COMPLETED';
+    }
+    return booking.status;
+  };
+
+  const getBookingStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PAID':
+        return 'Confirmée';
+      case 'PENDING':
+        return 'En attente';
+      case 'CANCELLED':
+        return 'Annulée';
+      case 'COMPLETED':
+        return 'Terminée';
+      case 'REFUNDED':
+        return 'Paiement incomplet';
+      default:
+        return status;
+    }
+  };
+
+  const getBookingStatusClass = (status: string) => {
+    switch (status) {
+      case 'PAID':
+        return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      case 'COMPLETED':
+        return 'bg-blue-100 text-blue-800';
+      case 'REFUNDED':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatBookingDate = (value: string | Date) =>
+    new Date(value).toLocaleDateString('fr-FR');
+
+  const getNights = (startDate: string | Date, endDate: string | Date) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffMs = end.getTime() - start.getTime();
+    return Math.max(0, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+  };
+
+  const toggleBookingDetails = (bookingId: string | number) => {
+    const key = String(bookingId);
+    setExpandedBookings((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const formatReservationNumber = (booking: any) => {
+    const existingReference = String(booking.reference ?? '').trim();
+    if (/^GC-\d{4,}$/.test(existingReference)) {
+      return existingReference;
+    }
+
+    const numericId = Number.parseInt(String(booking.id).replace(/\D/g, ''), 10);
+    const baseNumber = Number.isNaN(numericId) ? 1000 : 1000 + numericId;
+    return `GC-${baseNumber}`;
+  };
+
+  function getPaymentDateValue(booking: any) {
+    return booking.history?.[0]?.createdAt ?? booking.updatedAt ?? booking.createdAt;
+  }
+
+  const getPaymentMethodLabel = (booking: any) => {
+    const note = String(booking.history?.[0]?.note ?? '').toLowerCase();
+    if (note.includes('solde interne')) return 'Solde interne';
+    if (booking.stripePaymentIntentId) return 'Carte bancaire (Stripe)';
+    return 'Paiement validé';
+  };
+
+  const canModifyBooking = (booking: any) => {
+    if (booking.status === 'CANCELLED' || booking.status === 'REFUNDED') return false;
+    return new Date(booking.startDate).getTime() > Date.now();
+  };
+
+  const canCancelBooking = (booking: any) => {
+    if (booking.status === 'CANCELLED' || booking.status === 'REFUNDED') return false;
+    return new Date(booking.startDate).getTime() > Date.now();
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    setCancellingBookingId(bookingId);
+    setCancelDialogError(null);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/cancel`, {
+        method: 'POST',
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(payload?.error || 'Impossible d’annuler la réservation.');
+      }
+      await fetchBookings();
+      setCancelDialogOpen(false);
+      setBookingToCancelId(null);
+    } catch (error) {
+      setCancelDialogError(
+        error instanceof Error ? error.message : 'Erreur pendant l’annulation.'
+      );
+    } finally {
+      setCancellingBookingId(null);
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -210,10 +364,15 @@ export default function AccountPage() {
                   <p className="text-muted-foreground">Aucune réservation pour le moment.</p>
                 ) : (
                   <div className="space-y-4">
-                    {bookings.map((booking) => (
+                    {paginatedBookings.map((booking) => (
                       <Card key={booking.id}>
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
+                          {/** display status aligned with admin wording */}
+                          {(() => {
+                            const displayStatus = getBookingDisplayStatus(booking);
+                            return (
+                              <>
+                          <div className="flex items-start justify-between gap-4">
                             <div>
                               <h3 className="font-semibold mb-2">{booking.cottage?.title}</h3>
                               <p className="text-sm text-muted-foreground mb-1">
@@ -224,33 +383,144 @@ export default function AccountPage() {
                                 {formatCurrency(booking.total)}
                               </p>
                               <span
-                                className={`inline-block px-2 py-1 text-xs rounded ${
-                                  booking.status === 'PAID'
-                                    ? 'bg-gc-green/15 text-gc-forest'
-                                    : booking.status === 'PENDING'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-gray-100 text-gray-800'
-                                }`}
+                                className={`inline-block px-2 py-1 text-xs rounded ${getBookingStatusClass(
+                                  displayStatus
+                                )}`}
                               >
-                                {booking.status === 'PAID'
-                                  ? 'Confirmée'
-                                  : booking.status === 'PENDING'
-                                  ? 'En attente'
-                                  : booking.status}
+                                {getBookingStatusLabel(displayStatus)}
                               </span>
                             </div>
-                            {booking.status === 'PAID' && booking.invoice && (
-                              <Link href={`/api/invoices/${booking.id}/download`}>
-                                <Button variant="outline" size="sm">
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Facture
-                                </Button>
-                              </Link>
-                            )}
+                            <div className="flex flex-col items-end gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleBookingDetails(booking.id)}
+                              >
+                                {expandedBookings[String(booking.id)] ? 'Masquer détails' : 'Détails'}
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button type="button" variant="outline" size="sm">
+                                    Actions
+                                    <ChevronDown className="h-4 w-4 ml-2" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                  {canModifyBooking(booking) && booking.cottage?.slug ? (
+                                    <DropdownMenuItem asChild>
+                                      <Link
+                                        href={`/cottages/${booking.cottage.slug}/book?start=${booking.startDate}&end=${booking.endDate}&adults=${booking.guests}&children=0`}
+                                      >
+                                        Modifier réservation
+                                      </Link>
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem disabled>
+                                      Modifier réservation
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    disabled={
+                                      !canCancelBooking(booking) ||
+                                      cancellingBookingId === String(booking.id)
+                                    }
+                                    onSelect={() => {
+                                      setCancelDialogError(null);
+                                      setBookingToCancelId(String(booking.id));
+                                      setCancelDialogOpen(true);
+                                    }}
+                                  >
+                                    {cancellingBookingId === String(booking.id)
+                                      ? 'Annulation...'
+                                      : 'Annuler réservation'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link href="/contact">Contacter le propriétaire</Link>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              {booking.status === 'PAID' && booking.invoice && (
+                                <Link href={`/api/invoices/${booking.id}/download`}>
+                                  <Button variant="outline" size="sm">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Facture
+                                  </Button>
+                                </Link>
+                              )}
+                            </div>
                           </div>
+                          {expandedBookings[String(booking.id)] && (
+                            <div className="mt-4 rounded-md border bg-muted/20 p-3 text-sm">
+                              <div className="grid gap-1">
+                                <p>
+                                  <span className="font-medium">Numéro de réservation :</span>{' '}
+                                  {formatReservationNumber(booking)}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Nom du gîte réservé :</span>{' '}
+                                  {booking.cottage?.title ?? '—'}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Date d’arrivée :</span>{' '}
+                                  {formatBookingDate(booking.startDate)}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Date de départ :</span>{' '}
+                                  {formatBookingDate(booking.endDate)}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Nombre de nuits :</span>{' '}
+                                  {getNights(booking.startDate, booking.endDate)}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Nombre de personnes :</span>{' '}
+                                  {booking.guests}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Statut de la réservation :</span>{' '}
+                                  {getBookingStatusLabel(displayStatus)}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Prix total :</span>{' '}
+                                  {formatCurrency(booking.total)}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                              </>
+                            );
+                          })()}
                         </CardContent>
                       </Card>
                     ))}
+                    {reservationsTotalPages > 1 && (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={reservationsPage <= 1}
+                          onClick={() => setReservationsPage((prev) => Math.max(1, prev - 1))}
+                        >
+                          Précédent
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          Page {reservationsPage} / {reservationsTotalPages}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={reservationsPage >= reservationsTotalPages}
+                          onClick={() =>
+                            setReservationsPage((prev) => Math.min(reservationsTotalPages, prev + 1))
+                          }
+                        >
+                          Suivant
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -258,32 +528,80 @@ export default function AccountPage() {
 
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle>Mes factures</CardTitle>
+                <CardTitle>Mes facturations - Historique des paiements</CardTitle>
               </CardHeader>
               <CardContent>
-                {paidInvoices.length === 0 ? (
+                {paymentHistory.length === 0 ? (
                   <p className="text-muted-foreground">Aucune facture disponible pour le moment.</p>
                 ) : (
                   <div className="space-y-3">
-                    {paidInvoices.map((booking) => (
+                    {paginatedPaymentHistory.map((booking) => (
+                      (() => {
+                        const displayStatus = getBookingDisplayStatus(booking);
+                        return (
                       <div
                         key={`invoice-${booking.id}`}
-                        className="flex items-center justify-between border rounded-md p-3"
+                        className="flex items-center justify-between gap-4 border rounded-md p-4"
                       >
-                        <div>
-                          <p className="font-medium">{booking.cottage?.title}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{booking.cottage?.title}</p>
                           <p className="text-sm text-muted-foreground">
                             {formatDateRange(booking.startDate, booking.endDate)} • {formatCurrency(booking.total)}
+                          </p>
+                          <p className="mt-1">
+                            <span
+                              className={`inline-block px-2 py-1 text-xs rounded ${getBookingStatusClass(
+                                displayStatus
+                              )}`}
+                            >
+                              {getBookingStatusLabel(displayStatus)}
+                            </span>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Paiement: {formatBookingDate(getPaymentDateValue(booking))} •{' '}
+                            {getPaymentMethodLabel(booking)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Facture: {booking.invoice?.invoiceNumber ?? formatReservationNumber(booking)}
                           </p>
                         </div>
                         <Link href={`/api/invoices/${booking.id}/download`}>
                           <Button variant="outline" size="sm">
                             <Download className="h-4 w-4 mr-2" />
-                            Télécharger
+                            Télécharger PDF
                           </Button>
                         </Link>
                       </div>
+                        );
+                      })()
                     ))}
+                    {invoicesTotalPages > 1 && (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={invoicesPage <= 1}
+                          onClick={() => setInvoicesPage((prev) => Math.max(1, prev - 1))}
+                        >
+                          Précédent
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          Page {invoicesPage} / {invoicesTotalPages}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={invoicesPage >= invoicesTotalPages}
+                          onClick={() =>
+                            setInvoicesPage((prev) => Math.min(invoicesTotalPages, prev + 1))
+                          }
+                        >
+                          Suivant
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -492,6 +810,51 @@ export default function AccountPage() {
         </div>
       </main>
       <Footer />
+      <Dialog
+        open={cancelDialogOpen}
+        onOpenChange={(open) => {
+          setCancelDialogOpen(open);
+          if (!open) {
+            setCancelDialogError(null);
+            setBookingToCancelId(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer l’annulation</DialogTitle>
+            <DialogDescription>
+              Cette action annulera votre réservation. Voulez-vous continuer ?
+            </DialogDescription>
+          </DialogHeader>
+          {cancelDialogError ? (
+            <p className="text-sm text-destructive">{cancelDialogError}</p>
+          ) : null}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setCancelDialogOpen(false);
+                setCancelDialogError(null);
+                setBookingToCancelId(null);
+              }}
+            >
+              Garder la réservation
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={!bookingToCancelId || cancellingBookingId === bookingToCancelId}
+              onClick={() => bookingToCancelId && handleCancelBooking(bookingToCancelId)}
+            >
+              {cancellingBookingId === bookingToCancelId
+                ? 'Annulation...'
+                : 'Confirmer l’annulation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

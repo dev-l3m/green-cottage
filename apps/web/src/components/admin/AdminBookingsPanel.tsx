@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 type BookingStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED';
+type DisplayBookingStatus = BookingStatus | 'COMPLETED';
 
 type BookingHistoryItem = {
   id: string;
@@ -32,19 +33,21 @@ export type AdminBookingItem = {
   history: BookingHistoryItem[];
 };
 
-const STATUS_LABEL: Record<BookingStatus, string> = {
+const STATUS_LABEL: Record<DisplayBookingStatus, string> = {
   PENDING: 'En attente',
   PAID: 'Confirmée',
   CANCELLED: 'Annulée',
-  REFUNDED: 'Remboursée',
+  COMPLETED: 'Terminée',
+  REFUNDED: 'Paiement incomplet',
 };
 
-const FILTERS: Array<{ key: 'ALL' | BookingStatus; label: string }> = [
+const FILTERS: Array<{ key: 'ALL' | DisplayBookingStatus; label: string }> = [
   { key: 'ALL', label: 'Toutes' },
-  { key: 'PENDING', label: 'En attente' },
   { key: 'PAID', label: 'Confirmées' },
+  { key: 'PENDING', label: 'En attente' },
   { key: 'CANCELLED', label: 'Annulées' },
-  { key: 'REFUNDED', label: 'Remboursées' },
+  { key: 'COMPLETED', label: 'Terminées' },
+  { key: 'REFUNDED', label: 'Paiement incomplet' },
 ];
 
 export default function AdminBookingsPanel({
@@ -53,13 +56,21 @@ export default function AdminBookingsPanel({
   initialBookings: AdminBookingItem[];
 }) {
   const [bookings, setBookings] = useState(initialBookings);
-  const [activeFilter, setActiveFilter] = useState<'ALL' | BookingStatus>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | DisplayBookingStatus>('ALL');
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [statusNotes, setStatusNotes] = useState<Record<string, string>>({});
 
+  const getDisplayStatus = (booking: AdminBookingItem): DisplayBookingStatus => {
+    if (booking.status === 'PAID') {
+      const hasEnded = new Date(booking.endDate).getTime() < Date.now();
+      if (hasEnded) return 'COMPLETED';
+    }
+    return booking.status;
+  };
+
   const filtered = useMemo(() => {
     if (activeFilter === 'ALL') return bookings;
-    return bookings.filter((b) => b.status === activeFilter);
+    return bookings.filter((b) => getDisplayStatus(b) === activeFilter);
   }, [bookings, activeFilter]);
 
   const updateStatus = async (bookingId: string, nextStatus: BookingStatus) => {
@@ -127,6 +138,7 @@ export default function AdminBookingsPanel({
       <div className="space-y-3">
         {filtered.map((booking) => {
           const isPending = pendingId === booking.id;
+          const displayStatus = getDisplayStatus(booking);
           return (
             <div key={booking.id} className="p-4 border rounded-lg">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -141,7 +153,14 @@ export default function AdminBookingsPanel({
 
               <p className="text-sm mb-1">
                 <span className="font-medium">Client :</span>{' '}
-                {booking.userName ?? 'Client'} ({booking.userEmail})
+                {booking.userName ?? 'Client'} (
+                <a
+                  href={`mailto:${booking.userEmail}`}
+                  className="text-gc-green hover:underline"
+                >
+                  {booking.userEmail}
+                </a>
+                )
               </p>
               <p className="text-sm mb-1">
                 <span className="font-medium">Séjour :</span>{' '}
@@ -152,7 +171,7 @@ export default function AdminBookingsPanel({
                 <span className="font-medium">Total :</span> {booking.total.toFixed(0)}€
               </p>
               <p className="text-sm mb-3">
-                <span className="font-medium">Statut :</span> {STATUS_LABEL[booking.status]}
+                <span className="font-medium">Statut :</span> {STATUS_LABEL[displayStatus]}
               </p>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -167,7 +186,7 @@ export default function AdminBookingsPanel({
                   <option value="PENDING">En attente</option>
                   <option value="PAID">Confirmée</option>
                   <option value="CANCELLED">Annulée</option>
-                  <option value="REFUNDED">Remboursée</option>
+                  <option value="REFUNDED">Paiement incomplet</option>
                 </select>
                 <input
                   type="text"

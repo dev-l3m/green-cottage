@@ -64,12 +64,30 @@ export async function GET(request: NextRequest) {
       ])
     );
 
+    const promotionRows = await prisma.siteContent.findMany({
+      where: {
+        key: {
+          startsWith: 'cottage_promotion:',
+        },
+      },
+      select: {
+        key: true,
+        value: true,
+      },
+    });
+
+    const promotionsByCottageId = new Map(
+      promotionRows.map((row) => [row.key.replace('cottage_promotion:', ''), row.value])
+    );
+
     const cottagesWithStats = cottages.map((cottage) => {
       const stats = statsByCottageId.get(cottage.id);
+      const promotion = promotionsByCottageId.get(cottage.id) ?? null;
       return {
         ...cottage,
         averageRating: stats?.averageRating ?? null,
         reviewsCount: stats?.reviewsCount ?? 0,
+        promotion,
       };
     });
 

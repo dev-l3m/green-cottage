@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import AdminInvoicesPanel, { type AdminInvoiceItem } from '@/components/admin/AdminInvoicesPanel';
 
 async function getInvoicesData() {
@@ -68,6 +70,11 @@ export default async function AdminInvoicesPage() {
         <div className="p-4 border rounded-lg">
           <p className="text-sm text-muted-foreground">Factures manquantes</p>
           <p className="text-2xl font-bold">{missingCount}</p>
+          <div className="mt-3">
+            <Link href="/admin/invoices/history">
+              <Button size="sm" variant="outline">Voir historique</Button>
+            </Link>
+          </div>
         </div>
       </div>
 

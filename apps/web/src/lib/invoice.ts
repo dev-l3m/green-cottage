@@ -76,76 +76,134 @@ export async function generateInvoicePDF(booking: Booking & { invoice: Invoice |
   const buffers: Buffer[] = [];
 
   doc.on('data', buffers.push.bind(buffers));
+  const formatMoney = (value: number) =>
+    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+  const formatDate = (value: Date | string) => new Date(value).toLocaleDateString('fr-FR');
+  const formatAddress = () =>
+    [user.addressLine1, user.postalCode && user.city ? `${user.postalCode} ${user.city}` : null, user.country]
+      .filter(Boolean)
+      .join('\n');
 
-  // Header
-  doc.fontSize(20).font('Helvetica-Bold').text(companyName, 50, 50);
-  doc.fontSize(10).font('Helvetica').text(companyAddress, 50, 75);
-  if (companyEmail) doc.text(companyEmail, 50, 90);
-  if (companyPhone) doc.text(companyPhone, 50, 105);
-
-  // Invoice title and number
-  doc.fontSize(24).font('Helvetica-Bold').text('FACTURE', 400, 50);
-  doc.fontSize(12).font('Helvetica').text(`N° ${invoiceNumber}`, 400, 80);
-  doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 400, 95);
-
-  // Client info
-  doc.fontSize(14).font('Helvetica-Bold').text('Facturé à:', 50, 150);
-  doc.fontSize(10).font('Helvetica');
-  if (user.name) doc.text(user.name, 50, 170);
-  doc.text(user.email, 50, user.name ? 185 : 170);
-
-  // Booking details
-  doc.fontSize(14).font('Helvetica-Bold').text('Détails de la réservation:', 50, 220);
-  doc.fontSize(10).font('Helvetica');
-  doc.text(`Cottage: ${cottage.title}`, 50, 240);
-  doc.text(
-    `Période: ${new Date(booking.startDate).toLocaleDateString('fr-FR')} - ${new Date(booking.endDate).toLocaleDateString('fr-FR')}`,
-    50,
-    255
+  const nights = Math.ceil(
+    (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) /
+      (1000 * 60 * 60 * 24)
   );
-  doc.text(`Nombre de nuits: ${Math.ceil((new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) / (1000 * 60 * 60 * 24))}`, 50, 270);
-  doc.text(`Nombre d'invités: ${booking.guests}`, 50, 285);
-
-  // Items table
-  let y = 320;
-  doc.fontSize(12).font('Helvetica-Bold');
-  doc.text('Description', 50, y);
-  doc.text('Montant', 450, y, { align: 'right' });
-
-  y += 20;
-  doc.moveTo(50, y).lineTo(550, y).stroke();
-  y += 10;
-
-  doc.fontSize(10).font('Helvetica');
-  const nights = Math.ceil((new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) / (1000 * 60 * 60 * 24));
   const baseAmount = cottage.basePrice * nights;
-  doc.text(`Séjour (${nights} nuit${nights > 1 ? 's' : ''})`, 50, y);
-  doc.text(`${baseAmount.toFixed(2)} €`, 450, y, { align: 'right' });
-  y += 15;
-
   const options = booking.options as any;
-  if (options?.cleaning && cottage.cleaningFee) {
-    doc.text('Frais de ménage', 50, y);
-    doc.text(`${cottage.cleaningFee.toFixed(2)} €`, 450, y, { align: 'right' });
-    y += 15;
-  }
+  const cleaningAmount = options?.cleaning && cottage.cleaningFee ? Number(cottage.cleaningFee) : 0;
 
+  const items: Array<{ label: string; amount: number }> = [
+    {
+      label: `Séjour ${cottage.title} (${nights} nuit${nights > 1 ? 's' : ''})`,
+      amount: baseAmount,
+    },
+  ];
+  if (cleaningAmount > 0) {
+    items.push({ label: 'Frais de ménage', amount: cleaningAmount });
+  }
   if (booking.touristTax > 0) {
-    doc.text('Taxe de séjour', 50, y);
-    doc.text(`${booking.touristTax.toFixed(2)} €`, 450, y, { align: 'right' });
-    y += 15;
+    items.push({ label: 'Taxe de séjour', amount: booking.touristTax });
   }
 
-  y += 5;
-  doc.moveTo(50, y).lineTo(550, y).stroke();
-  y += 15;
+  // Header block
+  doc.font('Helvetica-Bold').fontSize(20).fillColor('#1f2937').text(companyName, 50, 48);
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  let companyY = 78;
+  if (companyAddress) {
+    doc.text(companyAddress, 50, companyY);
+    companyY += 28;
+  }
+  if (companyEmail) {
+    doc.text(companyEmail, 50, companyY);
+    companyY += 14;
+  }
+  if (companyPhone) {
+    doc.text(companyPhone, 50, companyY);
+  }
 
-  doc.fontSize(12).font('Helvetica-Bold');
-  doc.text('Total TTC', 50, y);
-  doc.text(`${booking.total.toFixed(2)} €`, 450, y, { align: 'right' });
+  doc.font('Helvetica-Bold').fontSize(26).fillColor('#111827').text('FACTURE', 400, 48, { align: 'right' });
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  doc.text(`N°: ${invoiceNumber}`, 360, 86, { width: 190, align: 'right' });
+  doc.text(`Date d'émission: ${formatDate(new Date())}`, 360, 100, { width: 190, align: 'right' });
+  doc.text(`Statut: Payée`, 360, 114, { width: 190, align: 'right' });
+
+  // Divider
+  doc.moveTo(50, 140).lineTo(545, 140).strokeColor('#e5e7eb').lineWidth(1).stroke();
+
+  // Bill to
+  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827').text('Facturé à', 50, 156);
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  let billY = 176;
+  if (user.name) {
+    doc.text(user.name, 50, billY);
+    billY += 14;
+  }
+  if (user.companyName) {
+    doc.text(user.companyName, 50, billY);
+    billY += 14;
+  }
+  doc.text(user.email, 50, billY);
+  billY += 14;
+  const address = formatAddress();
+  if (address) {
+    doc.text(address, 50, billY);
+    billY += 28;
+  }
+  if (user.vatNumber) {
+    doc.text(`TVA: ${user.vatNumber}`, 50, billY);
+  }
+
+  // Booking summary
+  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827').text('Réservation', 320, 156);
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  doc.text(`Réf. réservation: ${booking.id}`, 320, 176);
+  doc.text(`Hébergement: ${cottage.title}`, 320, 190, { width: 225 });
+  doc.text(`Arrivée: ${formatDate(booking.startDate)}`, 320, 218);
+  doc.text(`Départ: ${formatDate(booking.endDate)}`, 320, 232);
+  doc.text(`Voyageurs: ${booking.guests}`, 320, 246);
+  doc.text(`Nuits: ${nights}`, 320, 260);
+
+  // Table header
+  let y = 304;
+  doc.rect(50, y, 495, 22).fill('#f3f4f6');
+  doc.font('Helvetica-Bold').fontSize(10).fillColor('#111827');
+  doc.text('Description', 60, y + 7);
+  doc.text('Montant', 445, y + 7, { width: 90, align: 'right' });
+
+  // Table rows
+  y += 30;
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  for (const item of items) {
+    doc.text(item.label, 60, y, { width: 360 });
+    doc.text(formatMoney(item.amount), 445, y, { width: 90, align: 'right' });
+    y += 18;
+  }
+
+  y += 4;
+  doc.moveTo(50, y).lineTo(545, y).strokeColor('#e5e7eb').lineWidth(1).stroke();
+
+  // Totals
+  y += 14;
+  doc.font('Helvetica').fontSize(10).fillColor('#374151');
+  doc.text('Total HT', 385, y, { width: 70, align: 'right' });
+  doc.text(formatMoney(booking.total), 455, y, { width: 80, align: 'right' });
+  y += 14;
+  doc.text('TVA', 385, y, { width: 70, align: 'right' });
+  doc.text('0,00 €', 455, y, { width: 80, align: 'right' });
+  y += 16;
+  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827');
+  doc.text('Total TTC', 385, y, { width: 70, align: 'right' });
+  doc.text(formatMoney(booking.total), 445, y, { width: 90, align: 'right' });
 
   // Footer
-  doc.fontSize(8).font('Helvetica').text('Merci pour votre confiance!', 50, 750, { align: 'center' });
+  doc.moveTo(50, 740).lineTo(545, 740).strokeColor('#e5e7eb').lineWidth(1).stroke();
+  doc.font('Helvetica').fontSize(8).fillColor('#6b7280');
+  doc.text(
+    'Facture acquittée - Document généré automatiquement par Green Cottage.',
+    50,
+    748,
+    { width: 495, align: 'center' }
+  );
 
   doc.end();
 

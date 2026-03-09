@@ -282,10 +282,10 @@ export default function BookPage({ params }: { params: { slug: string } }) {
                     size="lg"
                     disabled={loading || !cottage}
                   >
-                    {loading ? 'Traitement...' : !cottage ? 'Chargement...' : 'Confirmer ma demande'}
+                    {loading ? 'Paiement en cours...' : !cottage ? 'Chargement...' : 'Payer avec mon solde'}
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    Demande de réservation sans paiement immédiat. Confirmation par l&apos;équipe.
+                    Paiement immédiat via votre solde interne de test.
                   </p>
                 </CardContent>
               </Card>
@@ -296,11 +296,10 @@ export default function BookPage({ params }: { params: { slug: string } }) {
         <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Demande envoyée</DialogTitle>
+              <DialogTitle>Paiement confirmé</DialogTitle>
             </DialogHeader>
             <p className="text-muted-foreground">
-              Votre demande de réservation a bien été envoyée. Notre équipe va la traiter et vous
-              confirmer la disponibilité rapidement.
+              Votre paiement a été validé avec le solde interne et votre réservation est confirmée.
             </p>
             <DialogFooter>
               <Button type="button" onClick={() => router.push('/account')}>

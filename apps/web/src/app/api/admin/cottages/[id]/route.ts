@@ -30,6 +30,11 @@ const cottageUpdateSchema = z.object({
   ratingScore: z.number().min(0).max(10).optional(),
   comfortStars: z.number().int().min(1).max(5).optional(),
   heroImage: imageUrlSchema.optional(),
+  promotionEnabled: z.boolean().optional(),
+  promotionTitle: z.string().max(120).optional(),
+  promotionPercent: z.number().min(0).max(100).optional(),
+  promotionStartDate: z.string().optional(),
+  promotionEndDate: z.string().optional(),
 });
 
 export async function GET(
@@ -80,7 +85,17 @@ export async function PATCH(
   try {
     const body = await request.json();
     const data = cottageUpdateSchema.parse(body);
-    const { ratingScore, comfortStars, heroImage, ...cottageData } = data;
+    const {
+      ratingScore,
+      comfortStars,
+      heroImage,
+      promotionEnabled,
+      promotionTitle,
+      promotionPercent,
+      promotionStartDate,
+      promotionEndDate,
+      ...cottageData
+    } = data;
 
     const cottage = await prisma.cottage.update({
       where: { id: params.id },
@@ -117,6 +132,49 @@ export async function PATCH(
             ratingScore: ratingScore ?? null,
             comfortStars: comfortStars ?? null,
             heroImage: heroImage ?? null,
+          },
+        },
+      });
+    }
+
+    if (
+      promotionEnabled !== undefined ||
+      promotionTitle !== undefined ||
+      promotionPercent !== undefined ||
+      promotionStartDate !== undefined ||
+      promotionEndDate !== undefined
+    ) {
+      const existingPromotion = await prisma.siteContent.findUnique({
+        where: { key: `cottage_promotion:${params.id}` },
+        select: { value: true },
+      });
+      const previous = (existingPromotion?.value ?? {}) as {
+        enabled?: boolean;
+        title?: string | null;
+        percent?: number | null;
+        startDate?: string | null;
+        endDate?: string | null;
+      };
+
+      await prisma.siteContent.upsert({
+        where: { key: `cottage_promotion:${params.id}` },
+        update: {
+          value: {
+            enabled: promotionEnabled ?? previous.enabled ?? false,
+            title: promotionTitle ?? previous.title ?? null,
+            percent: promotionPercent ?? previous.percent ?? null,
+            startDate: promotionStartDate ?? previous.startDate ?? null,
+            endDate: promotionEndDate ?? previous.endDate ?? null,
+          },
+        },
+        create: {
+          key: `cottage_promotion:${params.id}`,
+          value: {
+            enabled: promotionEnabled ?? false,
+            title: promotionTitle ?? null,
+            percent: promotionPercent ?? null,
+            startDate: promotionStartDate ?? null,
+            endDate: promotionEndDate ?? null,
           },
         },
       });

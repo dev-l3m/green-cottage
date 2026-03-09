@@ -207,6 +207,13 @@ async function main() {
 
   console.log('Created customer user:', customer.email);
 
+  // Ensure predictable test balances for internal payment flow.
+  await prisma.$executeRaw`
+    UPDATE "User"
+    SET "balance" = 50000
+    WHERE "id" IN (${admin.id}, ${customer.id})
+  `;
+
   // Seed cottages from apps/web/src/content/cottages.json (upsert by slug)
   await seedCottagesFromJson();
   await seedBlogPostsFromJson();

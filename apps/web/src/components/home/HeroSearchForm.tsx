@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Search, Calendar, Users, MapPin, ChevronDown } from 'lucide-react';
+import { Search, Calendar, Users, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { useHeaderUi, type CottageOption } from '@/components/ui/header-scroll-context';
@@ -30,19 +30,16 @@ interface HeroSearchFormProps {
 export function HeroSearchForm({ variant }: HeroSearchFormProps) {
   const {
     searchState,
-    updateDestination,
     updateRange,
     updateTravelers,
     submitSearch,
-    cottages,
   } = useHeaderUi();
 
   const isMobile = useMediaQuery(767);
   const [dateOpen, setDateOpen] = useState(false);
   const [travelersOpen, setTravelersOpen] = useState(false);
-  const [destOpen, setDestOpen] = useState(false);
 
-  const { destination, range, adults, children } = searchState;
+  const { range, adults, children } = searchState;
   const totalGuests = adults + children;
 
   const fromLabel = range.from
@@ -110,93 +107,6 @@ export function HeroSearchForm({ variant }: HeroSearchFormProps) {
                   : 'gap-3 lg:gap-2 lg:items-end'
               )}
             >
-              {/* Destination */}
-              <Popover open={destOpen} onOpenChange={setDestOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex flex-1 min-w-0 items-center text-left transition-colors',
-                      'hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
-                      isCompact
-                        ? 'flex-col items-start gap-0.5 px-4 py-2.5 rounded-l-full'
-                        : 'gap-3 rounded-lg border border-input bg-background px-4 py-3'
-                    )}
-                  >
-                    {!isCompact && (
-                      <div className="shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary flex h-9 w-9">
-                        <MapPin className="h-4 w-4" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0 w-full">
-                      {isCompact ? (
-                        <>
-                          <span className="block text-xs font-semibold text-gc-green">
-                            Destination
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="block truncate text-sm text-muted-foreground">
-                              {destination?.name ?? 'Tous nos gîtes'}
-                            </span>
-                            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Label className="text-xs text-muted-foreground font-normal block">
-                            Destination
-                          </Label>
-                          <span className="block truncate font-medium">
-                            {destination?.name ?? 'Tous nos gîtes'}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    {!isCompact && (
-                      <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0"
-                  align="start"
-                >
-                  <div className="max-h-[280px] overflow-y-auto">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        updateDestination(null);
-                        setDestOpen(false);
-                      }}
-                      className={cn(
-                        'w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-muted/50',
-                        !destination && 'bg-primary/10 text-primary'
-                      )}
-                    >
-                      Tous nos gîtes
-                    </button>
-                    {cottages.map((c) => (
-                      <button
-                        key={c.slug}
-                        type="button"
-                        onClick={() => {
-                          updateDestination(c);
-                          setDestOpen(false);
-                        }}
-                        className={cn(
-                          'w-full px-4 py-3 text-left text-sm transition-colors hover:bg-muted/50 flex items-center gap-2',
-                          destination?.slug === c.slug &&
-                            'bg-primary/10 text-primary font-medium'
-                        )}
-                      >
-                        <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        {c.name}
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-
               {/* Dates */}
               <Popover open={dateOpen} onOpenChange={setDateOpen}>
                 <PopoverTrigger asChild>
@@ -206,7 +116,7 @@ export function HeroSearchForm({ variant }: HeroSearchFormProps) {
                       'flex flex-1 min-w-0 items-center text-left transition-colors',
                       'hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
                       isCompact
-                        ? 'flex-col items-start gap-0.5 px-4 py-2.5 lg:min-w-[140px] border-l border-border/60'
+                        ? 'flex-col items-start gap-0.5 px-4 py-2.5 rounded-l-full lg:min-w-[140px]'
                         : 'gap-3 lg:min-w-[200px] rounded-lg border border-input bg-background px-4 py-3'
                     )}
                   >

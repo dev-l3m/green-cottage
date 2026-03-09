@@ -14,6 +14,12 @@ export const metadata = {
 
 export default function InfosPratiquesPage() {
   const data = practicalData as PracticalData;
+  const maskSensitiveValue = (label: string, value: string) => {
+    const normalized = label.toLowerCase();
+    const isPassword = normalized.includes('mot de passe');
+    if (!isPassword) return value;
+    return '************';
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -71,7 +77,7 @@ export default function InfosPratiquesPage() {
                           {item.label}
                         </span>
                         <span className="text-muted-foreground text-sm md:text-base">
-                          {item.value}
+                          {maskSensitiveValue(item.label, item.value)}
                         </span>
                       </div>
                     </li>

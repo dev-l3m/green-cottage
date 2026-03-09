@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/middleware';
 import { prisma } from '@/lib/prisma';
 import { checkAvailability } from '@/lib/availability';
 import { computeBookingPricing } from '@/lib/pricing';
+import { generateInvoiceNumber, generateInvoicePDF } from '@/lib/invoice';
 import { z } from 'zod';
 
 const bookingRequestSchema = z.object({
@@ -36,6 +37,17 @@ export async function GET(request: NextRequest) {
           select: {
             invoiceNumber: true,
           },
+        },
+        history: {
+          where: { newStatus: 'PAID' },
+          select: {
+            createdAt: true,
+            note: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
         },
       },
       orderBy: {
@@ -108,11 +120,34 @@ export async function POST(request: NextRequest) {
       withCleaning: Boolean(data.options?.cleaning),
     });
 
-    const booking = await prisma.$transaction(async (tx) => {
+    const paymentResult = await prisma.$transaction(async (tx) => {
+      const userId = (auth.user as any).id as string;
+      const userRows = await tx.$queryRaw<{ balance: number }[]>`
+        SELECT "balance"
+        FROM "User"
+        WHERE "id" = ${userId}
+        FOR UPDATE
+      `;
+
+      const currentBalance = userRows[0]?.balance;
+      if (typeof currentBalance !== 'number') {
+        throw new Error('USER_NOT_FOUND');
+      }
+
+      if (currentBalance < pricing.total) {
+        throw new Error('INSUFFICIENT_BALANCE');
+      }
+
+      await tx.$executeRaw`
+        UPDATE "User"
+        SET "balance" = "balance" - ${pricing.total}
+        WHERE "id" = ${userId}
+      `;
+
       const created = await tx.booking.create({
         data: {
           cottageId: cottage.id,
-          userId: (auth.user as any).id,
+          userId,
           startDate: data.startDate,
           endDate: data.endDate,
           guests: data.guests,
@@ -120,7 +155,7 @@ export async function POST(request: NextRequest) {
           subtotal: pricing.subtotal,
           touristTax: pricing.touristTax,
           total: pricing.total,
-          status: 'PENDING',
+          status: 'PAID',
         },
       });
 
@@ -128,25 +163,62 @@ export async function POST(request: NextRequest) {
         data: {
           bookingId: created.id,
           previousStatus: null,
-          newStatus: 'PENDING',
-          note: 'Demande de réservation créée depuis le formulaire public.',
-          changedByUserId: (auth.user as any).id,
+          newStatus: 'PAID',
+          note: 'Réservation payée via le solde interne utilisateur.',
+          changedByUserId: userId,
         },
       });
 
-      return created;
+      return {
+        booking: created,
+        remainingBalance: currentBalance - pricing.total,
+      };
     });
+
+    let invoiceNumber: string | null = null;
+    try {
+      invoiceNumber = await generateInvoiceNumber();
+      const pdfBuffer = await generateInvoicePDF({
+        ...paymentResult.booking,
+        invoice: { id: '', bookingId: paymentResult.booking.id, invoiceNumber, pdfUrl: null, pdfData: null, issuedAt: new Date() },
+      });
+
+      await prisma.invoice.create({
+        data: {
+          bookingId: paymentResult.booking.id,
+          invoiceNumber,
+          pdfData: Buffer.from(pdfBuffer),
+          pdfUrl: `/api/invoices/${paymentResult.booking.id}/download`,
+        },
+      });
+    } catch (invErr: unknown) {
+      const code = (invErr as { code?: string })?.code;
+      if (code !== 'P2002') {
+        console.error('Error generating invoice for internal payment:', invErr);
+      }
+    }
 
     return NextResponse.json(
       {
-        id: booking.id,
-        status: booking.status,
-        message: 'Votre demande de réservation a bien été envoyée.',
+        id: paymentResult.booking.id,
+        status: paymentResult.booking.status,
+        message: 'Paiement effectué avec votre solde interne. Réservation confirmée.',
+        remainingBalance: paymentResult.remainingBalance,
+        invoiceNumber,
       },
       { status: 201 }
     );
   } catch (error) {
     console.error('Error creating booking request:', error);
+    if (error instanceof Error && error.message === 'INSUFFICIENT_BALANCE') {
+      return NextResponse.json(
+        { error: 'Solde insuffisant pour finaliser le paiement.' },
+        { status: 402 }
+      );
+    }
+    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
+      return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Données invalides', details: error.errors }, { status: 400 });
     }

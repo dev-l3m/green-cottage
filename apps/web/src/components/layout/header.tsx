@@ -10,9 +10,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HeroSearchForm } from '@/components/home/HeroSearchForm';
 import { useHeaderUi } from '@/components/ui/header-scroll-context';
@@ -69,6 +71,12 @@ const sortByNameAsc = <T extends { name: string }>(items: T[]) =>
     a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
   );
 
+type HeaderNotification = {
+  id: string;
+  label: string;
+  href: string;
+};
+
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -76,9 +84,12 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdowns, setMobileDropdowns] = useState<Record<string, boolean>>({});
   const [landingHash, setLandingHash] = useState('');
+  const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
+  const [readNotificationIds, setReadNotificationIds] = useState<string[]>([]);
   const cottagesDropdown = sortByNameAsc(
     cottages.map((c) => ({ name: c.name, href: `/cottages/${c.slug}` }))
   );
+  const notificationStorageKey = `gc-notifications-read-${(session?.user as { email?: string } | undefined)?.email ?? 'guest'}`;
 
   const handleLandingNavClick = useCallback((e: React.MouseEvent, id: string, hash: string) => {
     e.preventDefault();
@@ -113,6 +124,118 @@ export function Header() {
       return () => cancelAnimationFrame(raf);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (!session) {
+      setNotifications([]);
+      setReadNotificationIds([]);
+      return;
+    }
+
+    let cancelled = false;
+    const loadNotifications = async () => {
+      try {
+        const res = await fetch('/api/bookings');
+        if (!res.ok) return;
+        const bookings = (await res.json()) as Array<{
+          status: string;
+          invoice?: { invoiceNumber: string } | null;
+          startDate: string;
+        }>;
+        if (cancelled) return;
+
+        const hasPaid = bookings.some((b) => b.status === 'PAID');
+        const hasInvoice = bookings.some((b) => Boolean(b.invoice));
+        const hasUpcomingStay = bookings.some((b) => {
+          const start = new Date(b.startDate).getTime();
+          const now = Date.now();
+          const threeDays = 3 * 24 * 60 * 60 * 1000;
+          return start > now && start - now <= threeDays;
+        });
+
+        const nextNotifications: HeaderNotification[] = [];
+        if (hasPaid) {
+          nextNotifications.push({
+            id: 'booking-confirmed',
+            label: 'Confirmation de réservation',
+            href: '/account',
+          });
+          nextNotifications.push({
+            id: 'payment-received',
+            label: 'Paiement reçu',
+            href: '/account',
+          });
+        }
+        if (hasInvoice) {
+          nextNotifications.push({
+            id: 'invoice-available',
+            label: 'Facture disponible',
+            href: '/account',
+          });
+        }
+        if (hasUpcomingStay) {
+          nextNotifications.push({
+            id: 'arrival-reminder',
+            label: 'Rappel avant arrivée',
+            href: '/account',
+          });
+        }
+
+        setNotifications(nextNotifications);
+      } catch {
+        if (!cancelled) setNotifications([]);
+      }
+    };
+
+    loadNotifications();
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    if (!session || typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(notificationStorageKey);
+      const parsed = raw ? (JSON.parse(raw) as string[]) : [];
+      setReadNotificationIds(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setReadNotificationIds([]);
+    }
+  }, [session, notificationStorageKey]);
+
+  useEffect(() => {
+    // Keep only read IDs that still exist in current notification list.
+    setReadNotificationIds((prev) => {
+      const validIds = prev.filter((id) => notifications.some((n) => n.id === id));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(notificationStorageKey, JSON.stringify(validIds));
+      }
+      return validIds;
+    });
+  }, [notifications, notificationStorageKey]);
+
+  const unreadNotificationsCount = notifications.filter(
+    (n) => !readNotificationIds.includes(n.id)
+  ).length;
+
+  const markNotificationsAsRead = (ids: string[]) => {
+    if (!ids.length || typeof window === 'undefined') return;
+    setReadNotificationIds((prev) => {
+      const next = Array.from(new Set([...prev, ...ids]));
+      window.localStorage.setItem(notificationStorageKey, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const handleNotificationsMenuOpenChange = (open: boolean) => {
+    if (!open) return;
+    markNotificationsAsRead(notifications.map((n) => n.id));
+  };
+
+  const handleNotificationClick = (id: string) => {
+    markNotificationsAsRead([id]);
+  };
 
   const toggleMobileDropdown = (key: string) => {
     setMobileDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -258,6 +381,36 @@ export function Header() {
         <div className={cn('items-center space-x-4', isAdminArea ? 'flex' : 'hidden lg:flex')}>
           {session ? (
             <>
+              <DropdownMenu onOpenChange={handleNotificationsMenuOpenChange}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-gray-900 hover:bg-gc-green hover:text-white"
+                    aria-label="Mes notifications"
+                  >
+                    <Bell className="h-4 w-4" />
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 text-center">
+                      {unreadNotificationsCount}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72">
+                  <DropdownMenuLabel>Mes notifications</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {notifications.length === 0 ? (
+                    <DropdownMenuItem disabled>Aucune notification</DropdownMenuItem>
+                  ) : (
+                    notifications.map((item) => (
+                      <DropdownMenuItem key={item.id} asChild className="py-2">
+                        <Link href={item.href} onClick={() => handleNotificationClick(item.id)}>
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Link href="/account">
                 <Button
                   variant="ghost"
@@ -382,6 +535,38 @@ export function Header() {
             <div className="pt-4 border-t mt-4 space-y-2">
               {session ? (
                 <>
+                  <DropdownMenu onOpenChange={handleNotificationsMenuOpenChange}>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-start relative">
+                        <Bell className="h-4 w-4 mr-2" />
+                        Mes notifications
+                        <span className="ml-auto min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] leading-4 text-center">
+                          {unreadNotificationsCount}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-72">
+                      <DropdownMenuLabel>Mes notifications</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {notifications.length === 0 ? (
+                        <DropdownMenuItem disabled>Aucune notification</DropdownMenuItem>
+                      ) : (
+                        notifications.map((item) => (
+                          <DropdownMenuItem key={`mobile-${item.id}`} asChild className="py-2">
+                            <Link
+                              href={item.href}
+                              onClick={() => {
+                                handleNotificationClick(item.id);
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              {item.label}
+                            </Link>
+                          </DropdownMenuItem>
+                        ))
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" size="sm" className="w-full justify-start">
                       Mon compte

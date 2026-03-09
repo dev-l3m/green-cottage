@@ -21,6 +21,7 @@ export type AdminInvoiceItem = {
 };
 
 type InvoiceFilter = 'ALL' | 'GENERATED' | 'MISSING';
+const VAT_RATE = 0.2;
 
 export default function AdminInvoicesPanel({
   initialInvoices,
@@ -104,12 +105,20 @@ export default function AdminInvoicesPanel({
         >
           Manquantes
         </Button>
+        <Link href="/admin/invoices/history">
+          <Button type="button" size="sm" variant="outline">
+            Historique
+          </Button>
+        </Link>
       </div>
 
       <div className="space-y-3">
         {filtered.map((item) => {
           const canGenerate = item.bookingStatus === 'PAID' && !item.invoiceId;
           const isPending = pendingBookingId === item.bookingId;
+          const totalTtc = item.total;
+          const totalHt = totalTtc / (1 + VAT_RATE);
+          const tvaAmount = totalTtc - totalHt;
 
           return (
             <div key={item.bookingId} className="p-4 border rounded-lg">
@@ -131,6 +140,10 @@ export default function AdminInvoicesPanel({
               </p>
               <p className="text-sm mb-3">
                 <span className="font-medium">Montant total :</span> {item.total.toFixed(0)}€
+              </p>
+              <p className="text-sm mb-3">
+                <span className="font-medium">TVA (20%) :</span> {tvaAmount.toFixed(2)}€{' '}
+                <span className="text-muted-foreground">(HT: {totalHt.toFixed(2)}€ • TTC: {totalTtc.toFixed(2)}€)</span>
               </p>
 
               {item.invoiceId ? (
