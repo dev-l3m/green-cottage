@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
-import { generateInvoicePDF, generateInvoiceNumber } from '@/lib/invoice';
 import type Stripe from 'stripe';
 
 // TEST MODE: Webhook secret from env (Stripe CLI or Dashboard). Required at runtime for signature verification.
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Idempotent: transaction only updates booking + removes lock. Invoice created after (once).
-      const result = await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx) => {
         const booking = await tx.booking.findUnique({
           where: { stripeSessionId: session.id },
           include: { invoice: true },
@@ -91,32 +90,8 @@ export async function POST(request: NextRequest) {
         return { updated: true as const, booking };
       });
 
-      // Generate invoice once, outside transaction (invoice helpers use global prisma). Idempotent: duplicate create throws P2002.
-      if (result.updated && result.booking && !result.booking.invoice) {
-        try {
-          const invoiceNumber = await generateInvoiceNumber();
-          const pdfBuffer = await generateInvoicePDF({
-            ...result.booking,
-            status: 'PAID',
-            invoice: null,
-          });
-          await prisma.invoice.create({
-            data: {
-              bookingId: result.booking.id,
-              invoiceNumber,
-              pdfData: Buffer.from(pdfBuffer),
-              pdfUrl: `/api/invoices/${result.booking.id}/download`,
-            },
-          });
-        } catch (invErr: unknown) {
-          const code = (invErr as { code?: string })?.code;
-          if (code === 'P2002') {
-            // Unique violation: invoice already created (e.g. concurrent webhook). Idempotent.
-          } else {
-            throw invErr;
-          }
-        }
-      }
+      // Temporary safeguard for deployment: disable PDF invoice generation path.
+      // Booking payment state still updates normally.
 
       return NextResponse.json({ received: true });
     } catch (error) {

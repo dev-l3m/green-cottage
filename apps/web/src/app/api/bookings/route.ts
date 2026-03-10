@@ -3,7 +3,6 @@ import { requireAuth } from '@/lib/middleware';
 import { prisma } from '@/lib/prisma';
 import { checkAvailability } from '@/lib/availability';
 import { computeBookingPricing } from '@/lib/pricing';
-import { generateInvoiceNumber, generateInvoicePDF } from '@/lib/invoice';
 import { z } from 'zod';
 
 const bookingRequestSchema = z.object({
@@ -175,28 +174,8 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    let invoiceNumber: string | null = null;
-    try {
-      invoiceNumber = await generateInvoiceNumber();
-      const pdfBuffer = await generateInvoicePDF({
-        ...paymentResult.booking,
-        invoice: { id: '', bookingId: paymentResult.booking.id, invoiceNumber, pdfUrl: null, pdfData: null, issuedAt: new Date() },
-      });
-
-      await prisma.invoice.create({
-        data: {
-          bookingId: paymentResult.booking.id,
-          invoiceNumber,
-          pdfData: Buffer.from(pdfBuffer),
-          pdfUrl: `/api/invoices/${paymentResult.booking.id}/download`,
-        },
-      });
-    } catch (invErr: unknown) {
-      const code = (invErr as { code?: string })?.code;
-      if (code !== 'P2002') {
-        console.error('Error generating invoice for internal payment:', invErr);
-      }
-    }
+    // Temporary safeguard for deployment: disable PDF invoice generation path.
+    const invoiceNumber: string | null = null;
 
     return NextResponse.json(
       {
