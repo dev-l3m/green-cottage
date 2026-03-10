@@ -42,8 +42,6 @@ const nextConfig = {
     ],
   },
   experimental: {
-    // Next 14: keep pdfkit external to avoid bundling issues with .afm files.
-    serverComponentsExternalPackages: ['pdfkit'],
     serverActions: {
       bodySizeLimit: '2mb',
     },
@@ -54,7 +52,6 @@ const nextConfig = {
     outputFileTracingIncludes: {
       '/**': [
         'node_modules/styled-jsx/**',
-        'node_modules/pdfkit/js/data/**',
       ],
     },
   },

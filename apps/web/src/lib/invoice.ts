@@ -1,4 +1,3 @@
-import PDFDocument from 'pdfkit';
 import { prisma } from './prisma';
 import type { Booking, Invoice } from '@prisma/client';
 
@@ -26,7 +25,175 @@ export async function generateInvoiceNumber(): Promise<string> {
   return invoiceNumber;
 }
 
-export async function generateInvoicePDF(booking: Booking & { invoice: Invoice | null }): Promise<Buffer> {
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function toMoney(value: number): string {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+}
+
+function toDate(value: Date | string): string {
+  return new Date(value).toLocaleDateString('fr-FR');
+}
+
+function renderInvoiceHtml(input: {
+  invoiceNumber: string;
+  bookingId: string;
+  startDate: Date | string;
+  endDate: Date | string;
+  guests: number;
+  nights: number;
+  items: Array<{ label: string; amount: number }>;
+  total: number;
+  companyName: string;
+  companyAddress: string;
+  companyEmail: string;
+  companyPhone: string;
+  userName: string;
+  userCompanyName: string;
+  userEmail: string;
+  userAddress: string;
+  userVatNumber: string;
+  cottageTitle: string;
+}): string {
+  const rows = input.items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">${escapeHtml(item.label)}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(toMoney(item.amount))}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Facture ${escapeHtml(input.invoiceNumber)}</title>
+    <style>
+      body { font-family: Arial, sans-serif; color: #1f2937; margin: 36px; font-size: 12px; }
+      .row { display: flex; justify-content: space-between; gap: 24px; }
+      .muted { color: #6b7280; }
+      .title { font-size: 28px; font-weight: 700; margin: 0; }
+      h2 { font-size: 14px; margin: 0 0 8px 0; }
+      .box { margin-top: 18px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+      th { text-align: left; background: #f3f4f6; padding: 10px 12px; font-size: 12px; }
+      .right { text-align: right; }
+      .totals { margin-top: 12px; width: 100%; }
+      .totals td { padding: 4px 0; }
+      .footer { margin-top: 28px; padding-top: 10px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <div>
+        <h1 style="margin:0;font-size:22px;">${escapeHtml(input.companyName)}</h1>
+        <div class="muted">${escapeHtml(input.companyAddress).replaceAll('\n', '<br/>')}</div>
+        <div class="muted">${escapeHtml(input.companyEmail)}</div>
+        <div class="muted">${escapeHtml(input.companyPhone)}</div>
+      </div>
+      <div style="text-align:right;">
+        <p class="title">FACTURE</p>
+        <div>N°: ${escapeHtml(input.invoiceNumber)}</div>
+        <div>Date d'emission: ${escapeHtml(toDate(new Date()))}</div>
+        <div>Statut: Payee</div>
+      </div>
+    </div>
+
+    <div class="row box">
+      <div style="flex:1;">
+        <h2>Facture a</h2>
+        <div>${escapeHtml(input.userName)}</div>
+        <div>${escapeHtml(input.userCompanyName)}</div>
+        <div>${escapeHtml(input.userEmail)}</div>
+        <div>${escapeHtml(input.userAddress).replaceAll('\n', '<br/>')}</div>
+        <div>${escapeHtml(input.userVatNumber)}</div>
+      </div>
+      <div style="flex:1;">
+        <h2>Reservation</h2>
+        <div>Ref.: ${escapeHtml(input.bookingId)}</div>
+        <div>Hebergement: ${escapeHtml(input.cottageTitle)}</div>
+        <div>Arrivee: ${escapeHtml(toDate(input.startDate))}</div>
+        <div>Depart: ${escapeHtml(toDate(input.endDate))}</div>
+        <div>Voyageurs: ${input.guests}</div>
+        <div>Nuits: ${input.nights}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="right">Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+
+    <table class="totals">
+      <tr><td style="text-align:right;">Total HT</td><td class="right">${escapeHtml(toMoney(input.total))}</td></tr>
+      <tr><td style="text-align:right;">TVA</td><td class="right">0,00 €</td></tr>
+      <tr><td style="text-align:right;font-weight:700;">Total TTC</td><td class="right" style="font-weight:700;">${escapeHtml(toMoney(input.total))}</td></tr>
+    </table>
+
+    <div class="footer">
+      Facture acquittee - Document genere automatiquement par Green Cottage.
+    </div>
+  </body>
+</html>`;
+}
+
+async function generatePdfWithBrowserless(html: string): Promise<Buffer> {
+  const apiUrl = process.env.BROWSERLESS_API_URL;
+  const token = process.env.BROWSERLESS_API_TOKEN;
+
+  if (!apiUrl || !token) {
+    throw new Error('Browserless is not configured: set BROWSERLESS_API_URL and BROWSERLESS_API_TOKEN.');
+  }
+
+  const endpoint = `${apiUrl.replace(/\/$/, '')}/pdf?token=${encodeURIComponent(token)}`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      html,
+      options: {
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '12mm',
+          right: '10mm',
+          bottom: '12mm',
+          left: '10mm',
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text().catch(() => '');
+    throw new Error(`Browserless PDF failed (${response.status}): ${details.slice(0, 300)}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+export async function generateInvoicePDF(
+  booking: Booking & { invoice: Invoice | null },
+  invoiceNumberHint?: string
+): Promise<Buffer> {
   const cottage = await prisma.cottage.findUnique({
     where: { id: booking.cottageId },
   });
@@ -39,7 +206,7 @@ export async function generateInvoicePDF(booking: Booking & { invoice: Invoice |
     throw new Error('Cottage or user not found');
   }
 
-  const invoiceNumber = booking.invoice?.invoiceNumber || (await generateInvoiceNumber());
+  const invoiceNumber = invoiceNumberHint || booking.invoice?.invoiceNumber || (await generateInvoiceNumber());
   const settingsRows = await prisma.siteContent.findMany({
     where: {
       key: {
@@ -72,24 +239,12 @@ export async function generateInvoicePDF(booking: Booking & { invoice: Invoice |
     process.env.INVOICE_COMPANY_PHONE ||
     '';
 
-  const doc = new PDFDocument({ margin: 50, size: 'A4' });
-  const buffers: Buffer[] = [];
-
-  doc.on('data', buffers.push.bind(buffers));
-  const formatMoney = (value: number) =>
-    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
-  const formatDate = (value: Date | string) => new Date(value).toLocaleDateString('fr-FR');
-  const formatAddress = () =>
-    [user.addressLine1, user.postalCode && user.city ? `${user.postalCode} ${user.city}` : null, user.country]
-      .filter(Boolean)
-      .join('\n');
-
   const nights = Math.ceil(
     (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) /
       (1000 * 60 * 60 * 24)
   );
-  const baseAmount = cottage.basePrice * nights;
-  const options = booking.options as any;
+  const baseAmount = Number(cottage.basePrice) * nights;
+  const options = booking.options as Record<string, unknown> | null;
   const cleaningAmount = options?.cleaning && cottage.cleaningFee ? Number(cottage.cleaningFee) : 0;
 
   const items: Array<{ label: string; amount: number }> = [
@@ -105,112 +260,40 @@ export async function generateInvoicePDF(booking: Booking & { invoice: Invoice |
     items.push({ label: 'Taxe de séjour', amount: booking.touristTax });
   }
 
-  // Header block
-  doc.font('Helvetica-Bold').fontSize(20).fillColor('#1f2937').text(companyName, 50, 48);
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  let companyY = 78;
-  if (companyAddress) {
-    doc.text(companyAddress, 50, companyY);
-    companyY += 28;
-  }
-  if (companyEmail) {
-    doc.text(companyEmail, 50, companyY);
-    companyY += 14;
-  }
-  if (companyPhone) {
-    doc.text(companyPhone, 50, companyY);
-  }
-
-  doc.font('Helvetica-Bold').fontSize(26).fillColor('#111827').text('FACTURE', 400, 48, { align: 'right' });
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  doc.text(`N°: ${invoiceNumber}`, 360, 86, { width: 190, align: 'right' });
-  doc.text(`Date d'émission: ${formatDate(new Date())}`, 360, 100, { width: 190, align: 'right' });
-  doc.text(`Statut: Payée`, 360, 114, { width: 190, align: 'right' });
-
-  // Divider
-  doc.moveTo(50, 140).lineTo(545, 140).strokeColor('#e5e7eb').lineWidth(1).stroke();
-
-  // Bill to
-  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827').text('Facturé à', 50, 156);
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  let billY = 176;
-  if (user.name) {
-    doc.text(user.name, 50, billY);
-    billY += 14;
-  }
-  if (user.companyName) {
-    doc.text(user.companyName, 50, billY);
-    billY += 14;
-  }
-  doc.text(user.email, 50, billY);
-  billY += 14;
-  const address = formatAddress();
-  if (address) {
-    doc.text(address, 50, billY);
-    billY += 28;
-  }
-  if (user.vatNumber) {
-    doc.text(`TVA: ${user.vatNumber}`, 50, billY);
-  }
-
-  // Booking summary
-  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827').text('Réservation', 320, 156);
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  doc.text(`Réf. réservation: ${booking.id}`, 320, 176);
-  doc.text(`Hébergement: ${cottage.title}`, 320, 190, { width: 225 });
-  doc.text(`Arrivée: ${formatDate(booking.startDate)}`, 320, 218);
-  doc.text(`Départ: ${formatDate(booking.endDate)}`, 320, 232);
-  doc.text(`Voyageurs: ${booking.guests}`, 320, 246);
-  doc.text(`Nuits: ${nights}`, 320, 260);
-
-  // Table header
-  let y = 304;
-  doc.rect(50, y, 495, 22).fill('#f3f4f6');
-  doc.font('Helvetica-Bold').fontSize(10).fillColor('#111827');
-  doc.text('Description', 60, y + 7);
-  doc.text('Montant', 445, y + 7, { width: 90, align: 'right' });
-
-  // Table rows
-  y += 30;
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  for (const item of items) {
-    doc.text(item.label, 60, y, { width: 360 });
-    doc.text(formatMoney(item.amount), 445, y, { width: 90, align: 'right' });
-    y += 18;
-  }
-
-  y += 4;
-  doc.moveTo(50, y).lineTo(545, y).strokeColor('#e5e7eb').lineWidth(1).stroke();
-
-  // Totals
-  y += 14;
-  doc.font('Helvetica').fontSize(10).fillColor('#374151');
-  doc.text('Total HT', 385, y, { width: 70, align: 'right' });
-  doc.text(formatMoney(booking.total), 455, y, { width: 80, align: 'right' });
-  y += 14;
-  doc.text('TVA', 385, y, { width: 70, align: 'right' });
-  doc.text('0,00 €', 455, y, { width: 80, align: 'right' });
-  y += 16;
-  doc.font('Helvetica-Bold').fontSize(12).fillColor('#111827');
-  doc.text('Total TTC', 385, y, { width: 70, align: 'right' });
-  doc.text(formatMoney(booking.total), 445, y, { width: 90, align: 'right' });
-
-  // Footer
-  doc.moveTo(50, 740).lineTo(545, 740).strokeColor('#e5e7eb').lineWidth(1).stroke();
-  doc.font('Helvetica').fontSize(8).fillColor('#6b7280');
-  doc.text(
-    'Facture acquittée - Document généré automatiquement par Green Cottage.',
-    50,
-    748,
-    { width: 495, align: 'center' }
-  );
-
-  doc.end();
-
-  return new Promise((resolve) => {
-    doc.on('end', () => {
-      const pdfBuffer = Buffer.concat(buffers);
-      resolve(pdfBuffer);
-    });
+  const userAddress = [user.addressLine1, user.postalCode && user.city ? `${user.postalCode} ${user.city}` : null, user.country]
+    .filter(Boolean)
+    .join('\n');
+  const html = renderInvoiceHtml({
+    invoiceNumber,
+    bookingId: booking.id,
+    startDate: booking.startDate,
+    endDate: booking.endDate,
+    guests: booking.guests,
+    nights,
+    items,
+    total: Number(booking.total),
+    companyName,
+    companyAddress,
+    companyEmail,
+    companyPhone,
+    userName: user.name || '',
+    userCompanyName: user.companyName || '',
+    userEmail: user.email,
+    userAddress,
+    userVatNumber: user.vatNumber ? `TVA: ${user.vatNumber}` : '',
+    cottageTitle: cottage.title,
   });
+
+  const providerRaw = process.env.PDF_PROVIDER?.trim().toLowerCase();
+  const hasBrowserlessConfig = Boolean(
+    process.env.BROWSERLESS_API_URL && process.env.BROWSERLESS_API_TOKEN
+  );
+  const provider = providerRaw || (hasBrowserlessConfig ? 'browserless' : 'disabled');
+  if (provider !== 'browserless') {
+    throw new Error(
+      `PDF generation is disabled for provider "${provider}". Set PDF_PROVIDER=browserless (and ensure env is loaded in current runtime) to enable.`
+    );
+  }
+
+  return generatePdfWithBrowserless(html);
 }
